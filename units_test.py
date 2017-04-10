@@ -7,8 +7,8 @@ import unittest
 import pdb
 from typing import Mapping
 from numbers import Number
-from src.dimension import Dimension, NullUnit
-from src.units import (
+from py_units.dimension import Dimension, NullUnit
+from py_units.units import (
     UnitsType,
     Unit,
     UnitsNode,
