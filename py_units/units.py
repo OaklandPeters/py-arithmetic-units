@@ -21,7 +21,7 @@ Advanced - and unnecessary for now:
 * operators on Dimension, that promotes it to a Leaf
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
-from typing import Callable, Sequence, Tuple, Union, Optional
+from typing import Callable, Sequence, Tuple, Union, Optional, Callable
 from numbers import Number
 import operator
 import itertools
@@ -29,16 +29,7 @@ import functools
 
 from .dimension import Dimension, NullUnit
 
-# __all__ = (
-#     UnitsType,
-#     Unit,
-#     UnitsLeaf,
-#     Scalar,
-#     UnitsFunction,
-#     Multiply,
-#     Divide,
-#     UnitsStem
-# )
+
 __all__ = (
     'UnitsType',
     'Unit',
@@ -51,10 +42,6 @@ __all__ = (
     'UnitVector',
     'Unit'
 )
-
-
-# temporary
-import pdb
 
 
 class UnitsTypeError(TypeError):
@@ -98,10 +85,6 @@ class Unit(UnitsType, metaclass=UnitMeta):
     # short = property(lambda self: NotImplemented) # type: str
 
 
-
-
-
-
 class UnitsLeaf(Unit):
     """
     Terminal unit: Unit = Dimension x Exponent
@@ -137,20 +120,6 @@ class UnitVector(UnitsLeaf):
 class Scalar(UnitsLeaf):
     """Might need to synthesize this with UnitLeaf"""
 
-    # def __new__(cls, value: Number, parent: Union['UnitsStem', None] = None):
-    #     return cls(NullUnit, value, parent)
-    #     """Override __new__, so that dispatching in UnitsLeaf.__new__ correctly proxies
-    #     to UnitVector.__new__
-    #     """
-    #     print("Scalar.__new__, cls: ", cls)
-    #     print("value: ", value)
-    #     print("parent: ", parent)
-
-    #     self = super().__new__()
-    #     # self = object.__new__(cls)
-    #     self.__init__(value, parent)
-    #     return self
-
     @classmethod
     def __call__(cls, *args):
         self = object.__new__(cls)
@@ -158,8 +127,6 @@ class Scalar(UnitsLeaf):
         return self
 
     def __init__(self, value: Number, parent: Union['UnitsStem', None] = None):
-    # def __init__(self, *args):
-    #     print("len args: ", len(args))
         self.dimension = NullUnit
         self.value = value
         self.parent = parent
@@ -169,7 +136,6 @@ class Scalar(UnitsLeaf):
         # (1) Check if this can be merged with an adjacent scalar node
         if simplify.children_match(self.parent):
             simplify.merge_child_scalars(parent)
-
 
         # (2) Migrate Scalar to the leftmost position
         return self
@@ -185,7 +151,6 @@ class Scalar(UnitsLeaf):
 
 class UnitsFunction(Unit):
     """Binary function."""
-    # units = property(lambda self: NotImplemented) # type: UnitsType
     # simplify = property(lambda self: NotImplemented) # type: Callable[[], Unit]
     # short = property(lambda self: NotImplemented) # type: str
     # name = property(lambda self: NotImplemented) # type: str
@@ -247,7 +212,79 @@ class UnitsStem(Unit):
         return self.astfunction.simplify(self)
 
 
+# ScalarFunction takes any number of Scalar arguments, and returns a Scalar
+ScalarFunction = Callable[Tuple[Scalar, ...], Scalar]
+NumberFunction = Callable[Tuple[Number, ...], Number]
+
+
+class FunctorError(TypeError):
+    pass
+
+def identity(x):
+    return x
+
+class ScalarFunctor:
+    """
+    Takes two Scalar objects (Unit<Number>, and a function on numbers,
+    and applies it.
+
+    Note - this is *not* a monad - because it is not a container, nor
+    can Scalar's contain other Scalars.
+
+    The extension to this would handle the Stems as well
+    """
+    domain = Number
+    codomain = Scalar
+
+    @classmethod
+    def construct(cls, number: Number) -> Scalar:
+        return Scalar(number)
+
+    @classmethod
+    def destruct(cls, scalar: Scalar) -> Number:
+        return scalar.value
+
+    @classmethod
+    def map(cls, func: NumberFunction, *scalars: Tuple[Scalar, ...]) -> Scalar:
+        return cls.construct(func(*tuple(arg.value for arg in args)))
+
+    @classmethod
+    def lift(cls, func: NumberFunction, Number]) -> ScalarFunction:
+        def wrapper(*scalars: Tuple[Scalar, ...]) -> Scalar:
+            return cls.map(func, *scalars)
+        return wrapper
+
+    @classmethod
+    def apply(cls, func: NumberFunction, *values: Tuple[Union[Number, Scalar], ...]) -> Scalar:
+        return cls.construct(
+            func(*tuple(
+                value.value if isinstance(value, Scalar) else value
+                for value in values
+            ))
+        )
 
 
 
+class NumberUnitSyntaxMixin:
+    """
 
+    """
+    functor = ScalarFunctor
+
+    def __add__(self, a, b):
+        return self.functor.map(operator.__add__, a, b)
+
+    def __floordiv__(self, a, b):
+        return self.functor.map(operator.__floordiv__, a, b)
+
+    def __mod__(self, a, b):
+        return self.functor.map(operator.__mod__, a, b)
+
+    def __pow__(self, a, b):
+        return self.functor.map(operator.__pow__, a, b)
+
+    def __sub__(self, a, b):
+        return self.functor.map(operator.__sub__, a, b)
+
+    def __truediv__(self, a, b):
+        return self.functor.map(operator.__truediv__, a, b)
