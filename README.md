@@ -5,6 +5,6 @@ Provides support in Python for units (or 'dimensions') in arithmetic expressions
 In Windows, run tests with:
 
 ```shell
-cd SubtypeUnits\
+cd py-arithmetic-units\
 py -m unittest units_test
 ```
