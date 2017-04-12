@@ -31,7 +31,7 @@ from .dimension import Dimension, NullUnit
 
 # __all__ = (
 #     UnitsType,
-#     UnitsNode,
+#     Unit,
 #     UnitsLeaf,
 #     Scalar,
 #     UnitsFunction,
@@ -41,7 +41,7 @@ from .dimension import Dimension, NullUnit
 # )
 __all__ = (
     'UnitsType',
-    'UnitsNode',
+    'Unit',
     'UnitsLeaf',
     'Scalar',
     'UnitsFunction',
@@ -53,6 +53,9 @@ __all__ = (
 )
 
 
+# temporary
+import pdb
+
 
 class UnitsTypeError(TypeError):
     pass
@@ -60,53 +63,63 @@ class UnitsTypeError(TypeError):
 
 class UnitsType:
     pass
-    # def __new__(cls, value: Union[str, Number]):
-
-
-def Unit(value: Union[str, Number]):
-    if isinstance(value, Number):
-        return Scalar(value)
-    elif isinstance(value, str):
-        return UnitVector(Dimension(value, value))
-    else:
-        raise UnitsTypeError("Attempted to construct unit for: {0}".format(value))
 
 
 
-class UnitsNode(UnitsType):
-    pass
-    # units = property(lambda self: NotImplemented) # type: UnitsType
+class UnitMeta(type):
+    def __call__(cls, *args, **kwargs):
+        return cls.__call__(*args, **kwargs)
+
+
+class Unit(UnitsType, metaclass=UnitMeta):
+    @classmethod
+    def __call__(cls, value: Union[str, Number]):
+        return cls.simple_constructor(value)
+
+    @classmethod
+    def simple_constructor(cls, value: Union[str, Number]):
+        if isinstance(value, Number):
+            return Scalar(value)
+        elif isinstance(value, str):
+            return UnitVector(Dimension(value, value))
+        else:
+            raise UnitsTypeError("Attempted to construct unit for: {0}".format(value))
+
+    @classmethod
+    def explicit_constructor(cls, dimension: Dimension, value: Number = 1, parent: Union['UnitsStem', None] = None):
+        if (dimension is NullUnit):
+            return Scalar(value, parent)
+        else:
+            return UnitVector(dimension, value, parent)
+
     # simplify = property(lambda self: NotImplemented) # type: Callable[[], UnitsNode]
-    # short = property(lambda self: NotImplemented) # type: str
     # name = property(lambda self: NotImplemented) # type: str
     # parent = property(lambda self: NotImplemented) # type: Union[UnitsNode, None]
+    # short = property(lambda self: NotImplemented) # type: str
 
 
-class UnitsLeaf(UnitsNode):
+
+
+
+
+class UnitsLeaf(Unit):
     """
     Terminal unit: Unit = Dimension x Exponent
     """
-    def __new__(cls, dimension: Dimension, value: Number = 1, parent: Union['UnitsStem', None] = None):
-        if dimension == NullUnit:
-            return Scalar.__new__(Scalar, parent, value)
-        else:
-            return UnitVector.__new__(UnitVector, parent, dimension, value)
+
+
+class UnitVector(UnitsLeaf):
+
+    @classmethod
+    def __call__(cls, *args):
+        self = object.__new__(cls)
+        self.__init__(*args)
+        return self
 
     def __init__(self, dimension: Dimension, value: Number = 1, parent: Union['UnitsStem', None] = None):
         self.dimension = dimension
         self.value = value
         self.parent = parent
-
-
-class UnitVector(UnitsLeaf):
-
-    def __new__(cls, dimension: Dimension, value: Number = 1, parent: Union['UnitsStem', None] = None):
-        """Override __new__, so that dispatching in UnitsLeaf.__new__ correctly proxies
-        to UnitVector.__new__
-        """
-        self = object.__new__(cls)
-        self.__init__(dimension, value, parent)
-        return self
 
     def __str__(self):
         if self.value == 1:
@@ -120,16 +133,37 @@ class UnitVector(UnitsLeaf):
         )
 
 
+
 class Scalar(UnitsLeaf):
     """Might need to synthesize this with UnitLeaf"""
 
-    def __new__(cls, value: Number, parent: Union['UnitsStem', None] = None):
-        """Override __new__, so that dispatching in UnitsLeaf.__new__ correctly proxies
-        to UnitVector.__new__
-        """
+    # def __new__(cls, value: Number, parent: Union['UnitsStem', None] = None):
+    #     return cls(NullUnit, value, parent)
+    #     """Override __new__, so that dispatching in UnitsLeaf.__new__ correctly proxies
+    #     to UnitVector.__new__
+    #     """
+    #     print("Scalar.__new__, cls: ", cls)
+    #     print("value: ", value)
+    #     print("parent: ", parent)
+
+    #     self = super().__new__()
+    #     # self = object.__new__(cls)
+    #     self.__init__(value, parent)
+    #     return self
+
+    @classmethod
+    def __call__(cls, *args):
         self = object.__new__(cls)
-        self.__init__(NullUnit, value, parent)
+        self.__init__(*args)
         return self
+
+    def __init__(self, value: Number, parent: Union['UnitsStem', None] = None):
+    # def __init__(self, *args):
+    #     print("len args: ", len(args))
+        self.dimension = NullUnit
+        self.value = value
+        self.parent = parent
+
 
     def simplify(self):
         # (1) Check if this can be merged with an adjacent scalar node
@@ -149,16 +183,16 @@ class Scalar(UnitsLeaf):
         )
 
 
-class UnitsFunction(UnitsNode):
+class UnitsFunction(Unit):
     """Binary function."""
     # units = property(lambda self: NotImplemented) # type: UnitsType
-    # simplify = property(lambda self: NotImplemented) # type: Callable[[], UnitsNode]
+    # simplify = property(lambda self: NotImplemented) # type: Callable[[], Unit]
     # short = property(lambda self: NotImplemented) # type: str
     # name = property(lambda self: NotImplemented) # type: str
-    # function = property(lambda self: NotImplemented) # type: Callable[[UnitsNode, UnitsNode], UnitsNode]
-    # left = property(lambda self: NotImplemented) # type: UnitsNode
-    # right = property(lambda self: NotImplemented) # type: UnitsNode
-    # parent = property(lambda self: NotImplemented) # type: Union[UnitsNode, None]
+    # function = property(lambda self: NotImplemented) # type: Callable[[Unit, Unit], Unit]
+    # left = property(lambda self: NotImplemented) # type: Unit
+    # right = property(lambda self: NotImplemented) # type: Unit
+    # parent = property(lambda self: NotImplemented) # type: Union[Unit, None]
 
     def __init__(self, parent, left, right):
         self.parent = parent
@@ -191,14 +225,14 @@ class Divide(UnitsFunction):
             return node
 
 
-class UnitsStem(UnitsNode):
+class UnitsStem(Unit):
     """
     represents a function over the units
     You don't actually execute it
 
     Needs to pick up the simplification rules for multiplying and dividing
     """
-    def __init__(self, parent: Union[UnitsNode, None], astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
+    def __init__(self, parent: Union[Unit, None], astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
         self.parent = parent
         self.astfunction = astfunction
         self.left = left

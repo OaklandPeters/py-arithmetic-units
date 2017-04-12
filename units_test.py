@@ -11,7 +11,6 @@ from py_units.dimension import Dimension, NullUnit
 from py_units.units import (
     UnitsType,
     Unit,
-    UnitsNode,
     UnitsLeaf,
     Scalar,
     UnitsFunction,
@@ -28,9 +27,17 @@ def validate_types(test, subject, type_mapping: Mapping[type, bool]):
     """Helper function for extensive type checking."""
     for _type, expectation in type_mapping.items():
         if expectation:
-            test.assertIsInstance(subject, _type)
+            test.assertIsInstance(subject, _type,
+                str.format(
+                    "Type AssertionError: {0} is not an instance of {1}",
+                    repr(subject), _type)
+            )
         else:
-            test.assertNotIsInstance(subject, _type)
+            test.assertNotIsInstance(subject, _type,
+                str.format(
+                    "Type AssertionError: {0} is incorrectly an instance of {1}",
+                    repr(subject), _type)
+            )
 
 
 class UnitsTests(unittest.TestCase):
@@ -40,17 +47,23 @@ class UnitsTests(unittest.TestCase):
             Scalar: True,
             UnitVector: False,
             UnitsLeaf: True,
-            UnitsNode: True,
+            Unit: True,
             UnitsType: True,
             UnitsStem: False,
             Dimension: False,
             Number: False
         })
         # Checking the internals
+        # try:
         self.assertIsInstance(scalar.dimension, Dimension)
         self.assertEqual(scalar.dimension, NullUnit)
         self.assertIsInstance(scalar.value, Number)
         self.assertEqual(scalar.value, expected_value)
+        # except AssertionError as exc:
+        #     print()
+        #     print("exception: ", exc)
+        #     print("scalar: ", repr(scalar))
+        #     pdb.set_trace()
         # String representation
         self.assertEqual(str(scalar), str(expected_value))
 
@@ -60,7 +73,7 @@ class UnitsTests(unittest.TestCase):
             Scalar: False,
             UnitVector: True,
             UnitsLeaf: True,
-            UnitsNode: True,
+            Unit: True,
             UnitsType: True,
             UnitsStem: False,
             Dimension: False,
@@ -81,34 +94,26 @@ class UnitsTests(unittest.TestCase):
     def test_scalar_from_unit_function(self):
         self._validate_scalar(Unit(5), 5)
 
+    def test_scalar_from_unitsleaf(self):
+        self._validate_scalar(UnitsLeaf(21), 21)
+
     def test_scalar_from_direct_construction(self):
         self._validate_scalar(Scalar(17), 17)
 
     def test_unit_vector_from_unit_function(self):
-        self._validate_unit_vector(Unit('seconds'), Dimension('seconds', 'seconds'), 2)
+        self._validate_unit_vector(Unit('seconds'), Dimension('seconds', 'seconds'), 1)
+
+    def test_unit_vector_From_unitsleaf(self):
+        self._validate_unit_vector(UnitsLeaf('seconds'), Dimension('seconds', 'seconds'), 1)
 
     def test_unit_vector_from_direct_construction(self):
-        dim = Dimension('pounds', 'pounds')
-        self._validate_unit_vector(UnitVector(None, dim, 1), dim, 1)
-        self._validate_unit_vector(UnitVector(None, dim, 3), dim, 3)
+        dim = Dimension('pounds')
+        self._validate_unit_vector(UnitVector(dim), dim, 1)
+        self._validate_unit_vector(UnitVector(dim, 3), dim, 3)
 
-    # def test_unit_vector_constructor(self):
-    #     dim = Dimension('feet')
-    #     vector = UnitVector(None, feet_dim, 1)
-    #     unit_cons = Unit('feet')
 
-    #     self.assertEqual(vector, unit_cons)
-    #     self.assertEqual(dim, vector.dimension)
-    #     self.assertEqual(dim, vector.dimension)
-    #     self.assertEqual(vector.value, 1)
-    #     self.assertEqual(unit_cons.value, 1)
 
-    def test_unitsleaf_constructor(self):
-        self._validate_scalar(UnitsLeaf(None, NullUnit, 2), 2)
-        self._validate_unit_vector(UnitVector('boxes count'))
 
-        print(thing)
-        pdb.set_trace()
 
 
     # def test_scalar_arithmetic(self):
@@ -125,3 +130,5 @@ class UnitsTests(unittest.TestCase):
     #---- Test ideas:
     # Unit(5) * Unit(4) == Unit(20)
     # (feet * seconds / feet * (pounds / (feet * feet)))
+
+
