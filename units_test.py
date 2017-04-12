@@ -17,7 +17,9 @@ from py_units.units import (
     Multiply,
     Divide,
     UnitsStem,
-    UnitVector
+    UnitVector,
+    ScalarFunctor,
+    NumberUnitSyntaxMixin
 )
 
 
@@ -40,7 +42,7 @@ def validate_types(test, subject, type_mapping: Mapping[type, bool]):
             )
 
 
-class UnitsTests(unittest.TestCase):
+class UnitsLeafTests(unittest.TestCase):
     def _validate_scalar(self, scalar, expected_value):
         # Checking type hierarchy
         validate_types(self, scalar, {
@@ -54,17 +56,10 @@ class UnitsTests(unittest.TestCase):
             Number: False
         })
         # Checking the internals
-        # try:
         self.assertIsInstance(scalar.dimension, Dimension)
         self.assertEqual(scalar.dimension, NullUnit)
         self.assertIsInstance(scalar.value, Number)
         self.assertEqual(scalar.value, expected_value)
-        # except AssertionError as exc:
-        #     print()
-        #     print("exception: ", exc)
-        #     print("scalar: ", repr(scalar))
-        #     pdb.set_trace()
-        # String representation
         self.assertEqual(str(scalar), str(expected_value))
 
     def _validate_unit_vector(self, unit_vector, expected_dimension, expected_value):
@@ -111,18 +106,6 @@ class UnitsTests(unittest.TestCase):
         self._validate_unit_vector(UnitVector(dim), dim, 1)
         self._validate_unit_vector(UnitVector(dim, 3), dim, 3)
 
-
-
-
-
-
-    # def test_scalar_arithmetic(self):
-    #     actual = Unit(5) * Unit(4)
-    #     expected = Unit(20)
-    #     print(actual)
-    #     pdb.set_trace()
-    #     print()
-
     def test_dimension_registry(self):
         """Do this via checking the id() of the returned objects"""
         pass
@@ -130,5 +113,48 @@ class UnitsTests(unittest.TestCase):
     #---- Test ideas:
     # Unit(5) * Unit(4) == Unit(20)
     # (feet * seconds / feet * (pounds / (feet * feet)))
+
+
+class FunctorTests(unittest.TestCase):
+    def test_syntax_mixin_map(self):
+        class Wat(Scalar, NumberUnitSyntaxMixin):
+            pass
+        Wat.codomain = Wat
+
+        pairs = [(1, 5), (3, 7), (9, -2), (0, 11.5)]
+        for a, b in pairs:
+            self.assertEqual(Wat(a) + Wat(b), Wat(a + b))
+            self.assertEqual(Wat(a) - Wat(b), Wat(a - b))
+            self.assertEqual(Wat(a) * Wat(b), Wat(a * b))
+            self.assertEqual(Wat(a) / Wat(b), Wat(a / b))
+            self.assertEqual(Wat(a) ** Wat(b), Wat(a ** b))
+            self.assertEqual(Wat(a) % Wat(b), Wat(a % b))
+
+    def test_syntax_mixin_apply(self):
+        class Wat(Scalar, NumberUnitSyntaxMixin):
+            pass
+        Wat.codomain = Wat
+
+        # Confirm type
+        self.assertIsInstance(Wat(5) + 3, Wat)
+
+        # Check mathematics and composition
+        pairs = [(1, 5), (3, 7), (9, -2), (0, 11.5)]
+        for a, b in pairs:
+            self.assertEqual(Wat(a) + b, Wat(a + b))
+            self.assertEqual(Wat(a) - b, Wat(a - b))
+            self.assertEqual(Wat(a) * b, Wat(a * b))
+            self.assertEqual(Wat(a) / b, Wat(a / b))
+            self.assertEqual(Wat(a) ** b, Wat(a ** b))
+            self.assertEqual(Wat(a) % b, Wat(a % b))
+
+    def test_long_chaining(self):
+        class Wat(Scalar, NumberUnitSyntaxMixin):
+            pass
+        Wat.codomain = Wat
+
+        waaaat = Wat(2) + 3 + 4 + 5
+        self.assertIsInstance(waaaat, Wat)
+        self.assertEqual(waaaat, Wat(2 + 3 + 4 + 5))
 
 

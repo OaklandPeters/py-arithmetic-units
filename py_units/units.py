@@ -40,7 +40,9 @@ __all__ = (
     'Divide',
     'UnitsStem',
     'UnitVector',
-    'Unit'
+    'Unit',
+    'ScalarFunctor',
+    'NumberUnitSyntaxMixin'
 )
 
 
@@ -148,6 +150,12 @@ class Scalar(UnitsLeaf):
             self.__class__.__name__, self.value, self.parent
         )
 
+    def __eq__(self, other):
+        if isinstance(other, Scalar):
+            return self.value == other.value
+        else:
+            return False
+
 
 class UnitsFunction(Unit):
     """Binary function."""
@@ -213,8 +221,15 @@ class UnitsStem(Unit):
 
 
 # ScalarFunction takes any number of Scalar arguments, and returns a Scalar
-ScalarFunction = Callable[Tuple[Scalar, ...], Scalar]
-NumberFunction = Callable[Tuple[Number, ...], Number]
+
+
+
+# Python's typing system is incapable of expressing functions without a fixed number
+#     of arguments
+# So we do the best we can -
+ScalarFunction = Callable[[Scalar], Scalar]
+NumberFunction = Callable[[Number], Number]
+
 
 
 class FunctorError(TypeError):
@@ -233,34 +248,33 @@ class ScalarFunctor:
 
     The extension to this would handle the Stems as well
     """
-    domain = Number
-    codomain = Scalar
+    def __init__(self, domain, codomain):
+        self.domain = domain
+        self.codomain = codomain
 
-    @classmethod
-    def construct(cls, number: Number) -> Scalar:
-        return Scalar(number)
+    def construct(self, number: Number) -> Scalar:
+        return self.codomain(number)
 
-    @classmethod
-    def destruct(cls, scalar: Scalar) -> Number:
+    def destruct(self, scalar: Scalar) -> Number:
         return scalar.value
 
-    @classmethod
-    def map(cls, func: NumberFunction, *scalars: Tuple[Scalar, ...]) -> Scalar:
-        return cls.construct(func(*tuple(arg.value for arg in args)))
+    def map(self, func: NumberFunction, *scalars: Tuple[Scalar, ...]) -> Scalar:
+        return self.construct(
+            func(
+                *tuple(arg.value for arg in scalars)
+            )
+        )
 
-    @classmethod
-    def lift(cls, func: NumberFunction, Number]) -> ScalarFunction:
+    def lift(self, func: NumberFunction) -> ScalarFunction:
         def wrapper(*scalars: Tuple[Scalar, ...]) -> Scalar:
-            return cls.map(func, *scalars)
+            return self.map(func, *scalars)
         return wrapper
 
-    @classmethod
-    def apply(cls, func: NumberFunction, *values: Tuple[Union[Number, Scalar], ...]) -> Scalar:
-        return cls.construct(
-            func(*tuple(
-                value.value if isinstance(value, Scalar) else value
-                for value in values
-            ))
+    def apply(self, func: NumberFunction, *values: Tuple[Union[Number, Scalar], ...]) -> Scalar:
+        _values = tuple(value if not isinstance(value, Scalar) else value.value
+                        for value in values)
+        return self.construct(
+            func(*_values)
         )
 
 
@@ -269,22 +283,31 @@ class NumberUnitSyntaxMixin:
     """
 
     """
-    functor = ScalarFunctor
+    @property
+    def functor(self):
+        cls = self.__class__
+        if not hasattr(self, '_functor'):
+            self._functor = ScalarFunctor(Number, cls)
+        return self._functor
 
-    def __add__(self, a, b):
-        return self.functor.map(operator.__add__, a, b)
+    def __add__(self, a):
+        return self.functor.apply(operator.__add__, self, a)
 
-    def __floordiv__(self, a, b):
-        return self.functor.map(operator.__floordiv__, a, b)
+    def __sub__(self, a):
+        return self.functor.apply(operator.__sub__, self, a)
 
-    def __mod__(self, a, b):
-        return self.functor.map(operator.__mod__, a, b)
+    def __mul__(self, a):
+        return self.functor.apply(operator.__mul__, self, a)
 
-    def __pow__(self, a, b):
-        return self.functor.map(operator.__pow__, a, b)
+    def __truediv__(self, a):
+        return self.functor.apply(operator.__truediv__, self, a)
 
-    def __sub__(self, a, b):
-        return self.functor.map(operator.__sub__, a, b)
+    def __floordiv__(self, a):
+        return self.functor.apply(operator.__floordiv__, self, a)
 
-    def __truediv__(self, a, b):
-        return self.functor.map(operator.__truediv__, a, b)
+    def __mod__(self, a):
+        return self.functor.apply(operator.__mod__, self, a)
+
+    def __pow__(self, a):
+        return self.functor.apply(operator.__pow__, self, a)
+
