@@ -170,13 +170,13 @@ class FunctorTests(unittest.TestCase):
         self.assertIsInstance(waaaat, Wat)
         self.assertEqual(waaaat, Wat(2 + 3 + 4 + 5))
 
-    def test_real_world_syntax_usage(self):
-        # I want this to work:
-        Dollars = Unit('Dollars')
-        Threads = Unit('Threads')
-        PpR = (44 * Dollars) / Threads
-        RpB = (23 * Threads)
-        CtB = PpR * RpB
-        CtB == 1012
-        print(CtB)
+    # def test_real_world_syntax_usage(self):
+    #     Dollars = Unit('Dollars')
+    #     Threads = Unit('Threads')
+    #     # This step requires stems to work
+    #     PpR = (44 * Dollars) / Threads
+    #     RpB = (23 * Threads)
+    #     # This step requires simplification to work
+    #     CtB = PpR * RpB
+    #     self.assertEqual(CtB, Dollars(44 * 23))
 
