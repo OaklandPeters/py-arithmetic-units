@@ -148,6 +148,19 @@ class FunctorTests(unittest.TestCase):
             self.assertEqual(Wat(a) ** b, Wat(a ** b))
             self.assertEqual(Wat(a) % b, Wat(a % b))
 
+            # Test reversed operators
+            self.assertEqual(a + Wat(b), Wat(a + b))
+            self.assertEqual(a - Wat(b), Wat(a - b))
+            self.assertEqual(a * Wat(b), Wat(a * b))
+            self.assertEqual(a / Wat(b), Wat(a / b))
+            self.assertEqual(a ** Wat(b), Wat(a ** b))
+            self.assertEqual(a % Wat(b), Wat(a % b))
+
+
+        import pdb
+        print("Try from left")
+        pdb.set_trace()
+
     def test_long_chaining(self):
         class Wat(Scalar, NumberUnitSyntaxMixin):
             pass
@@ -157,4 +170,13 @@ class FunctorTests(unittest.TestCase):
         self.assertIsInstance(waaaat, Wat)
         self.assertEqual(waaaat, Wat(2 + 3 + 4 + 5))
 
+    def test_real_world_syntax_usage(self):
+        # I want this to work:
+        Dollars = Unit('Dollars')
+        Threads = Unit('Threads')
+        PpR = (44 * Dollars) / Threads
+        RpB = (23 * Threads)
+        CtB = PpR * RpB
+        CtB == 1012
+        print(CtB)
 

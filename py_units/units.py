@@ -293,21 +293,42 @@ class NumberUnitSyntaxMixin:
     def __add__(self, a):
         return self.functor.apply(operator.__add__, self, a)
 
+    def __radd__(self, a):
+        return self.functor.apply(operator.__add__, a, self)
+
     def __sub__(self, a):
         return self.functor.apply(operator.__sub__, self, a)
+
+    def __rsub__(self, a):
+        return self.functor.apply(operator.__sub__, a, self)
 
     def __mul__(self, a):
         return self.functor.apply(operator.__mul__, self, a)
 
+    def __rmul__(self, a):
+        return self.functor.apply(operator.__mul__, a, self)
+
     def __truediv__(self, a):
         return self.functor.apply(operator.__truediv__, self, a)
+
+    def __rtruediv__(self, a):
+        return self.functor.apply(operator.__truediv__, a, self)
 
     def __floordiv__(self, a):
         return self.functor.apply(operator.__floordiv__, self, a)
 
+    def __rfloordiv__(self, a):
+        return self.functor.apply(operator.__floordiv__, a, self)
+
     def __mod__(self, a):
         return self.functor.apply(operator.__mod__, self, a)
 
+    def __rmod__(self, a):
+        return self.functor.apply(operator.__mod__, a, self)
+
     def __pow__(self, a):
         return self.functor.apply(operator.__pow__, self, a)
+
+    def __rpow__(self, a):
+        return self.functor.apply(operator.__pow__, a, self)
 
