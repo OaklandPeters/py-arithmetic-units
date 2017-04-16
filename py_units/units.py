@@ -29,22 +29,12 @@ from .base import UnitsTypeError, UnitsType, UnitMeta
 from .syntax import InvariantFunctor, ArithmeticSyntaxMixin
 
 
-__all__ = (
-    'Unit',
-    'UnitsLeaf',
-    'Scalar',
-    'UnitsFunction',
-    'Multiply',
-    'Divide',
-    'UnitsStem',
-    'UnitVector',
-    'Unit',
-    'NumberScalarInvariantFunctor',
-    'UnitsStem'
-)
-
-
 class Unit(UnitsType, metaclass=UnitMeta):
+    """Base conrete type for all nodes of a unit-tree.
+    All children must be one of:
+        UnitsLeaf
+        UnitsStem
+    """
     @classmethod
     def __call__(cls, value: Union[str, Number]):
         return cls.simple_constructor(value)
@@ -67,16 +57,22 @@ class Unit(UnitsType, metaclass=UnitMeta):
 
 
 class UnitsLeaf(Unit):
-    """
+    """Base class for leaf-nodes
     Terminal unit: Unit = Dimension x Exponent
     """
+    pass
 
 
 class UnitsStem(Unit):
+    """Base class for stem nodes."""
     pass
 
 
 class UnitVector(UnitsLeaf):
+    """Leaf node representing a single unit, with an exponent.
+    For example, both `feet` and `seconds^2` would be
+    Compound units (such as `feet-)
+    """
 
     @classmethod
     def __call__(cls, *args):
@@ -100,6 +96,14 @@ class UnitVector(UnitsLeaf):
             self.__class__.__name__, self.dimension, self.value, self.parent
         )
 
+    # Mathematics syntax
+    # def __add__(self, a):
+    #   pass
+    # def __mul__(self, a):
+    #   pass
+    # def __rmul__(self, a):
+    #   pass
+
 
 class NumberScalarInvariantFunctor(InvariantFunctor['Scalar', Number]):
     def construct(self, domain: Number) -> 'Scalar':
@@ -109,8 +113,8 @@ class NumberScalarInvariantFunctor(InvariantFunctor['Scalar', Number]):
         return codomain.value
 
 
-class Scalar(UnitsLeaf, ArithmeticSyntaxMixin):
-    """Might need to synthesize this with UnitLeaf"""
+class Scalar(UnitsLeaf, ArithmeticSyntaxMixin['Scalar', Number]):
+    """Leaf node representing a pure number with no units."""
     @property
     def functor(self) -> NumberScalarInvariantFunctor:
         """
@@ -132,7 +136,6 @@ class Scalar(UnitsLeaf, ArithmeticSyntaxMixin):
         self.dimension = NullUnit
         self.value = value
         self.parent = parent
-
 
     def simplify(self):
         # (1) Check if this can be merged with an adjacent scalar node
@@ -157,20 +160,11 @@ class Scalar(UnitsLeaf, ArithmeticSyntaxMixin):
             return False
 
 
-class UnitsFunction(Unit):
-    """Binary function."""
-    # simplify = property(lambda self: NotImplemented) # type: Callable[[], Unit]
-    # short = property(lambda self: NotImplemented) # type: str
-    # name = property(lambda self: NotImplemented) # type: str
-    # function = property(lambda self: NotImplemented) # type: Callable[[Unit, Unit], Unit]
-    # left = property(lambda self: NotImplemented) # type: Unit
-    # right = property(lambda self: NotImplemented) # type: Unit
-    # parent = property(lambda self: NotImplemented) # type: Union[Unit, None]
-
-    def __init__(self, parent, left, right):
-        self.parent = parent
-        self.left = left
-        self.right = right
+class UnitsFunction:
+    """Binary function to operate on the tree.
+    Each UnitStem has one function contained in it.
+    UnitsFunction is primary used structuring simplification steps.
+    """
 
 
 
@@ -185,6 +179,7 @@ class Multiply(UnitsFunction):
             # Create new with unit of left, and add exponents
             return UnitsLeaf(node.left.units, node.left.exponent + node.right.exponents)
         return node
+
 
 class Divide(UnitsFunction):
     function = operator.__truediv__
@@ -205,7 +200,8 @@ class UnitsFunctionStem(UnitsStem):
 
     Needs to pick up the simplification rules for multiplying and dividing
     """
-    def __init__(self, parent: Union[Unit, None], astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
+    def __init__(self, parent: Union[Unit, None],
+                 astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
         self.parent = parent
         self.astfunction = astfunction
         self.left = left
@@ -218,20 +214,3 @@ class UnitsFunctionStem(UnitsStem):
 
     def simplify(self):
         return self.astfunction.simplify(self)
-
-
-# ScalarFunction takes any number of Scalar arguments, and returns a Scalar
-
-
-
-# Python's typing system is incapable of expressing functions without a fixed number
-#     of arguments
-# So we do the best we can -
-ScalarFunction = Callable[[Scalar], Scalar]
-NumberFunction = Callable[[Number], Number]
-
-
-
-
-
-
