@@ -20,18 +20,16 @@ Notes
 Advanced - and unnecessary for now:
 * operators on Dimension, that promotes it to a Leaf
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
-from typing import Callable, Sequence, Tuple, Union, Optional, Callable
+from typing import Callable, Union
 from numbers import Number
 import operator
-import itertools
-import functools
 
 from .dimension import Dimension, NullUnit
+from .base import UnitsTypeError, UnitsType, UnitMeta
+from .syntax import InvariantFunctor, ArithmeticSyntaxMixin
 
 
 __all__ = (
-    'UnitsType',
     'Unit',
     'UnitsLeaf',
     'Scalar',
@@ -41,23 +39,9 @@ __all__ = (
     'UnitsStem',
     'UnitVector',
     'Unit',
-    'ScalarFunctor',
-    'NumberUnitSyntaxMixin'
+    'NumberScalarInvariantFunctor',
+    'UnitsStem'
 )
-
-
-class UnitsTypeError(TypeError):
-    pass
-
-
-class UnitsType:
-    pass
-
-
-
-class UnitMeta(type):
-    def __call__(cls, *args, **kwargs):
-        return cls.__call__(*args, **kwargs)
 
 
 class Unit(UnitsType, metaclass=UnitMeta):
@@ -81,16 +65,15 @@ class Unit(UnitsType, metaclass=UnitMeta):
         else:
             return UnitVector(dimension, value, parent)
 
-    # simplify = property(lambda self: NotImplemented) # type: Callable[[], UnitsNode]
-    # name = property(lambda self: NotImplemented) # type: str
-    # parent = property(lambda self: NotImplemented) # type: Union[UnitsNode, None]
-    # short = property(lambda self: NotImplemented) # type: str
-
 
 class UnitsLeaf(Unit):
     """
     Terminal unit: Unit = Dimension x Exponent
     """
+
+
+class UnitsStem(Unit):
+    pass
 
 
 class UnitVector(UnitsLeaf):
@@ -118,9 +101,26 @@ class UnitVector(UnitsLeaf):
         )
 
 
+class NumberScalarInvariantFunctor(InvariantFunctor['Scalar', Number]):
+    def construct(self, domain: Number) -> 'Scalar':
+        return self.Codomain(domain)
 
-class Scalar(UnitsLeaf):
+    def destruct(self, codomain: 'Scalar') -> Number:
+        return codomain.value
+
+
+class Scalar(UnitsLeaf, ArithmeticSyntaxMixin):
     """Might need to synthesize this with UnitLeaf"""
+    @property
+    def functor(self) -> NumberScalarInvariantFunctor:
+        """
+        Provides a class-specific functor version based
+        on the concrete class at run-time.
+        """
+        cls = self.__class__
+        if not hasattr(self, '_functor'):
+            self._functor = NumberScalarInvariantFunctor(Number, cls)
+        return self._functor
 
     @classmethod
     def __call__(cls, *args):
@@ -198,7 +198,7 @@ class Divide(UnitsFunction):
             return node
 
 
-class UnitsStem(Unit):
+class UnitsFunctionStem(UnitsStem):
     """
     represents a function over the units
     You don't actually execute it
@@ -232,103 +232,6 @@ NumberFunction = Callable[[Number], Number]
 
 
 
-class FunctorError(TypeError):
-    pass
-
-def identity(x):
-    return x
-
-class ScalarFunctor:
-    """
-    Takes two Scalar objects (Unit<Number>, and a function on numbers,
-    and applies it.
-
-    Note - this is *not* a monad - because it is not a container, nor
-    can Scalar's contain other Scalars.
-
-    The extension to this would handle the Stems as well
-    """
-    def __init__(self, domain, codomain):
-        self.domain = domain
-        self.codomain = codomain
-
-    def construct(self, number: Number) -> Scalar:
-        return self.codomain(number)
-
-    def destruct(self, scalar: Scalar) -> Number:
-        return scalar.value
-
-    def map(self, func: NumberFunction, *scalars: Tuple[Scalar, ...]) -> Scalar:
-        return self.construct(
-            func(
-                *tuple(arg.value for arg in scalars)
-            )
-        )
-
-    def lift(self, func: NumberFunction) -> ScalarFunction:
-        def wrapper(*scalars: Tuple[Scalar, ...]) -> Scalar:
-            return self.map(func, *scalars)
-        return wrapper
-
-    def apply(self, func: NumberFunction, *values: Tuple[Union[Number, Scalar], ...]) -> Scalar:
-        _values = tuple(value if not isinstance(value, Scalar) else value.value
-                        for value in values)
-        return self.construct(
-            func(*_values)
-        )
 
 
-
-class NumberUnitSyntaxMixin:
-    """
-
-    """
-    @property
-    def functor(self):
-        cls = self.__class__
-        if not hasattr(self, '_functor'):
-            self._functor = ScalarFunctor(Number, cls)
-        return self._functor
-
-    def __add__(self, a):
-        return self.functor.apply(operator.__add__, self, a)
-
-    def __radd__(self, a):
-        return self.functor.apply(operator.__add__, a, self)
-
-    def __sub__(self, a):
-        return self.functor.apply(operator.__sub__, self, a)
-
-    def __rsub__(self, a):
-        return self.functor.apply(operator.__sub__, a, self)
-
-    def __mul__(self, a):
-        return self.functor.apply(operator.__mul__, self, a)
-
-    def __rmul__(self, a):
-        return self.functor.apply(operator.__mul__, a, self)
-
-    def __truediv__(self, a):
-        return self.functor.apply(operator.__truediv__, self, a)
-
-    def __rtruediv__(self, a):
-        return self.functor.apply(operator.__truediv__, a, self)
-
-    def __floordiv__(self, a):
-        return self.functor.apply(operator.__floordiv__, self, a)
-
-    def __rfloordiv__(self, a):
-        return self.functor.apply(operator.__floordiv__, a, self)
-
-    def __mod__(self, a):
-        return self.functor.apply(operator.__mod__, self, a)
-
-    def __rmod__(self, a):
-        return self.functor.apply(operator.__mod__, a, self)
-
-    def __pow__(self, a):
-        return self.functor.apply(operator.__pow__, self, a)
-
-    def __rpow__(self, a):
-        return self.functor.apply(operator.__pow__, a, self)
 

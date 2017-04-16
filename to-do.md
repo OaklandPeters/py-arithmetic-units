@@ -1,9 +1,30 @@
 
+# Immediate & Mess cleanup
+* Cleanup type annotations in syntax.py
+* Figure out how to handle InvariantFunctor, and it's use of abstractmethod
+    - ... because other classes do not inherit from ABCMeta
+* Remove unneeded imports from syntax.py
+
+
+# Problem:
+* Can't combine 'UnitMeta' with 'Generic'
+
+
 # Mathematics
-1. Merge the syntax functor into UnitsLeaf
+* Merge the syntax functor into UnitsLeaf
+* Write new functor + SyntaxMixin for:
+    - UnitsVector
+    - UnitsStem
 
 # Package Structure
-1. Move abstracts to their module
+* Move import and `__all__` into `__init__`
+    - Change tests to import from `__all__`
+* Move syntax and functor into their own file
+* Move abstracts to their module
+
+# Class structure
+* Make Scalar inherit from syntax mixin
+* Rename NumberUnitSyntaxMixin --> ArithmeticSyntaxMixin
 
 # Constructors
 1. `Dimension` - return `NullUnit` when name/identifier is None

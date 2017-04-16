@@ -18,8 +18,7 @@ from py_units.units import (
     Divide,
     UnitsStem,
     UnitVector,
-    ScalarFunctor,
-    NumberUnitSyntaxMixin
+    NumberScalarInvariantFunctor
 )
 
 
@@ -117,58 +116,41 @@ class UnitsLeafTests(unittest.TestCase):
 
 class FunctorTests(unittest.TestCase):
     def test_syntax_mixin_map(self):
-        class Wat(Scalar, NumberUnitSyntaxMixin):
-            pass
-        Wat.codomain = Wat
-
         pairs = [(1, 5), (3, 7), (9, -2), (0, 11.5)]
         for a, b in pairs:
-            self.assertEqual(Wat(a) + Wat(b), Wat(a + b))
-            self.assertEqual(Wat(a) - Wat(b), Wat(a - b))
-            self.assertEqual(Wat(a) * Wat(b), Wat(a * b))
-            self.assertEqual(Wat(a) / Wat(b), Wat(a / b))
-            self.assertEqual(Wat(a) ** Wat(b), Wat(a ** b))
-            self.assertEqual(Wat(a) % Wat(b), Wat(a % b))
+            self.assertEqual(Scalar(a) + Scalar(b), Scalar(a + b))
+            self.assertEqual(Scalar(a) - Scalar(b), Scalar(a - b))
+            self.assertEqual(Scalar(a) * Scalar(b), Scalar(a * b))
+            self.assertEqual(Scalar(a) / Scalar(b), Scalar(a / b))
+            self.assertEqual(Scalar(a) ** Scalar(b), Scalar(a ** b))
+            self.assertEqual(Scalar(a) % Scalar(b), Scalar(a % b))
 
     def test_syntax_mixin_apply(self):
-        class Wat(Scalar, NumberUnitSyntaxMixin):
-            pass
-        Wat.codomain = Wat
-
         # Confirm type
-        self.assertIsInstance(Wat(5) + 3, Wat)
+        self.assertIsInstance(Scalar(5) + 3, Scalar)
 
         # Check mathematics and composition
         pairs = [(1, 5), (3, 7), (9, -2), (0, 11.5)]
         for a, b in pairs:
-            self.assertEqual(Wat(a) + b, Wat(a + b))
-            self.assertEqual(Wat(a) - b, Wat(a - b))
-            self.assertEqual(Wat(a) * b, Wat(a * b))
-            self.assertEqual(Wat(a) / b, Wat(a / b))
-            self.assertEqual(Wat(a) ** b, Wat(a ** b))
-            self.assertEqual(Wat(a) % b, Wat(a % b))
+            self.assertEqual(Scalar(a) + b, Scalar(a + b))
+            self.assertEqual(Scalar(a) - b, Scalar(a - b))
+            self.assertEqual(Scalar(a) * b, Scalar(a * b))
+            self.assertEqual(Scalar(a) / b, Scalar(a / b))
+            self.assertEqual(Scalar(a) ** b, Scalar(a ** b))
+            self.assertEqual(Scalar(a) % b, Scalar(a % b))
 
             # Test reversed operators
-            self.assertEqual(a + Wat(b), Wat(a + b))
-            self.assertEqual(a - Wat(b), Wat(a - b))
-            self.assertEqual(a * Wat(b), Wat(a * b))
-            self.assertEqual(a / Wat(b), Wat(a / b))
-            self.assertEqual(a ** Wat(b), Wat(a ** b))
-            self.assertEqual(a % Wat(b), Wat(a % b))
-
-
-        import pdb
-        print("Try from left")
-        pdb.set_trace()
+            self.assertEqual(a + Scalar(b), Scalar(a + b))
+            self.assertEqual(a - Scalar(b), Scalar(a - b))
+            self.assertEqual(a * Scalar(b), Scalar(a * b))
+            self.assertEqual(a / Scalar(b), Scalar(a / b))
+            self.assertEqual(a ** Scalar(b), Scalar(a ** b))
+            self.assertEqual(a % Scalar(b), Scalar(a % b))
 
     def test_long_chaining(self):
-        class Wat(Scalar, NumberUnitSyntaxMixin):
-            pass
-        Wat.codomain = Wat
-
-        waaaat = Wat(2) + 3 + 4 + 5
-        self.assertIsInstance(waaaat, Wat)
-        self.assertEqual(waaaat, Wat(2 + 3 + 4 + 5))
+        waaaat = Scalar(2) + 3 + 4 + 5
+        self.assertIsInstance(waaaat, Scalar)
+        self.assertEqual(waaaat, Scalar(2 + 3 + 4 + 5))
 
     # def test_real_world_syntax_usage(self):
     #     Dollars = Unit('Dollars')
@@ -179,4 +161,3 @@ class FunctorTests(unittest.TestCase):
     #     # This step requires simplification to work
     #     CtB = PpR * RpB
     #     self.assertEqual(CtB, Dollars(44 * 23))
-
