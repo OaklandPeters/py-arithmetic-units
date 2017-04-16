@@ -4,37 +4,37 @@ cd SubtypeUnits\
 py -m unittest units_test
 """
 import unittest
-import pdb
 from typing import Mapping
 from numbers import Number
+
 from py_units.dimension import Dimension, NullUnit
 from py_units.units import (
     UnitsType,
     Unit,
     UnitsLeaf,
     Scalar,
-    UnitsFunction,
-    Multiply,
-    Divide,
+    # UnitsFunction,
+    # Multiply,
+    # Divide,
     UnitsStem,
     UnitVector,
     NumberScalarInvariantFunctor
 )
 
 
-
-
 def validate_types(test, subject, type_mapping: Mapping[type, bool]):
     """Helper function for extensive type checking."""
     for _type, expectation in type_mapping.items():
         if expectation:
-            test.assertIsInstance(subject, _type,
+            test.assertIsInstance(
+                subject, _type,
                 str.format(
                     "Type AssertionError: {0} is not an instance of {1}",
                     repr(subject), _type)
             )
         else:
-            test.assertNotIsInstance(subject, _type,
+            test.assertNotIsInstance(
+                subject, _type,
                 str.format(
                     "Type AssertionError: {0} is incorrectly an instance of {1}",
                     repr(subject), _type)
@@ -105,14 +105,6 @@ class UnitsLeafTests(unittest.TestCase):
         self._validate_unit_vector(UnitVector(dim), dim, 1)
         self._validate_unit_vector(UnitVector(dim, 3), dim, 3)
 
-    def test_dimension_registry(self):
-        """Do this via checking the id() of the returned objects"""
-        pass
-
-    #---- Test ideas:
-    # Unit(5) * Unit(4) == Unit(20)
-    # (feet * seconds / feet * (pounds / (feet * feet)))
-
 
 class FunctorTests(unittest.TestCase):
     def test_syntax_mixin_map(self):
@@ -152,6 +144,21 @@ class FunctorTests(unittest.TestCase):
         self.assertIsInstance(waaaat, Scalar)
         self.assertEqual(waaaat, Scalar(2 + 3 + 4 + 5))
 
+
+class StemTests(unittest.TestCase):
+
+    def test_basic_dimension_merge(self):
+        compound = Unit('feet') * Unit('feet')
+        import pdb
+        print("\n(compound::{0}) = {1}\n".format(compound.__class__.__name__, repr(compound)))
+        pdb.set_trace()
+
+    # def test_basic_scalar_to_dimension_merge(self):
+    #     compound = Unit('feet') * Unit(32)
+    #     import pdb
+    #     print("\n(compound::{0}) = {1}\n".format(compound.__class__.__name__, repr(compound)))
+    #     pdb.set_trace()
+
     # def test_real_world_syntax_usage(self):
     #     Dollars = Unit('Dollars')
     #     Threads = Unit('Threads')
@@ -161,3 +168,15 @@ class FunctorTests(unittest.TestCase):
     #     # This step requires simplification to work
     #     CtB = PpR * RpB
     #     self.assertEqual(CtB, Dollars(44 * 23))
+    #
+    # (feet * seconds / feet * (pounds / (feet * feet)))
+
+
+class DimensionTests(unittest.TestCase):
+    """
+    Todo in the future
+    """
+
+    def test_dimension_registry(self):
+        """Do this via checking the id() of the returned objects"""
+        pass
