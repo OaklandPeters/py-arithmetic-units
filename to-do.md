@@ -4,11 +4,12 @@
 * Then - Stem portion in general
 * IGNORE SIMLIFICATION (for now)
 
-# Semi Hard Problem
-* Replacing a node, while keeping the reference to it in the parent correct
-* Possibly some Traversable-related chicanary
-
 # Mathematics
+* Change mixin to be more generic across Leaf & Stem
+    - Take current arithmetic mixin --> Graveyard
+    - In all cases --> form UnitsStem, based on UnitsFunction
+    - Requires writing one UnitsFunction per operator
+        + Initially do this inside `units.py`, then move to new `arithmetic.py`
 * Write new functor + SyntaxMixin for UnitsVector
     - Do it on UnitsVector class for now
     - Chart this out on paper first, for each operator
@@ -16,7 +17,6 @@
 * Migrate syntax methods out of UnitsVector, and into supporting classes in syntax.py
 * THINK THROUGH: UnitsCompound 'new' -all possible pairs of arguments
     - what functions will be needed
-*
 * AFTER: DimensionNode has syntax - merge the syntax functor into UnitsLeaf
 * Syntax mixin for UnitsStem - note this is actually hard
 * Add handling for mixing mathematics arguments of types (Scalar, UnitsVector, UnitsStem)
@@ -25,6 +25,8 @@
 # Simplification
 * Integrate simplification and syntax.
 * Handle which operators are displayed on which node types via syntax mixins
+* Semi Hard Problem: replacing node, while maintaining child-ref in parent
+    - Possibly some Traversable-related chicanary
 
 
 
