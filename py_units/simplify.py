@@ -89,9 +89,10 @@ def simplify_dimension_nodes(stem: UnitsStem) -> Unit:
     if isinstance(stem.left, DimensionNode) and isinstance(stem.right, DimensionNode):
         if stem.left.dimension == stem.right.dimension:
             # Create new with unit of left, and add exponents
-            return DimensionNode(
-                stem.left.dimension,
-                stem.left.value + stem.right.value
+            return DimensionFunctor.map(
+                stem.function,
+                stem.left,
+                stem.right
             )
     return stem
 
