@@ -4,8 +4,9 @@
 * Then - Stem portion in general
 * IGNORE SIMLIFICATION (for now)
 
-SEMI HARD PROBLEM:
-Replacing a node, while keeping the reference to it in the parent correct
+# Semi Hard Problem
+* Replacing a node, while keeping the reference to it in the parent correct
+* Possibly some Traversable-related chicanary
 
 # Mathematics
 * Write new functor + SyntaxMixin for UnitsVector
