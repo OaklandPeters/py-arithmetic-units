@@ -1,6 +1,11 @@
 
 # Next task
 * Multiplication on UnitsVector to yield stems
+* Then - Stem portion in general
+* IGNORE SIMLIFICATION (for now)
+
+SEMI HARD PROBLEM:
+Replacing a node, while keeping the reference to it in the parent correct
 
 # Mathematics
 * Write new functor + SyntaxMixin for UnitsVector
@@ -11,10 +16,14 @@
 * THINK THROUGH: UnitsCompound 'new' -all possible pairs of arguments
     - what functions will be needed
 *
-* AFTER: UnitVector has syntax - merge the syntax functor into UnitsLeaf
+* AFTER: DimensionNode has syntax - merge the syntax functor into UnitsLeaf
 * Syntax mixin for UnitsStem - note this is actually hard
 * Add handling for mixing mathematics arguments of types (Scalar, UnitsVector, UnitsStem)
     - Rethink from a class-structure & proxying standpoint.
+
+# Simplification
+* Integrate simplification and syntax.
+* Handle which operators are displayed on which node types via syntax mixins
 
 
 

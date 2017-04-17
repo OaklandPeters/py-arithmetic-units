@@ -20,13 +20,13 @@ Notes
 Advanced - and unnecessary for now:
 * operators on Dimension, that promotes it to a Leaf
 """
-from typing import Callable, Union
+from typing import Union
 from numbers import Number
 import operator
 
 from .dimension import Dimension, NullUnit
 from .base import UnitsTypeError, UnitsType, UnitMeta
-from .syntax import InvariantFunctor, ArithmeticSyntaxMixin
+from .syntax import Functor, InvariantFunctor, ArithmeticSyntaxMixin
 
 
 class Unit(UnitsType, metaclass=UnitMeta):
