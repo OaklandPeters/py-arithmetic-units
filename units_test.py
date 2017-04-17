@@ -17,7 +17,7 @@ from py_units.units import (
     # Multiply,
     # Divide,
     UnitsStem,
-    UnitVector,
+    DimensionNode,
     NumberScalarInvariantFunctor
 )
 
@@ -46,7 +46,7 @@ class UnitsLeafTests(unittest.TestCase):
         # Checking type hierarchy
         validate_types(self, scalar, {
             Scalar: True,
-            UnitVector: False,
+            DimensionNode: False,
             UnitsLeaf: True,
             Unit: True,
             UnitsType: True,
@@ -65,7 +65,7 @@ class UnitsLeafTests(unittest.TestCase):
         # Checking type hierarchy
         validate_types(self, unit_vector, {
             Scalar: False,
-            UnitVector: True,
+            DimensionNode: True,
             UnitsLeaf: True,
             Unit: True,
             UnitsType: True,
@@ -95,15 +95,15 @@ class UnitsLeafTests(unittest.TestCase):
         self._validate_scalar(Scalar(17), 17)
 
     def test_unit_vector_from_unit_function(self):
-        self._validate_unit_vector(Unit('seconds'), Dimension('seconds', 'seconds'), 1)
+        self._validate_unit_vector(Unit('seconds'), Dimension('seconds'), 1)
 
     def test_unit_vector_From_unitsleaf(self):
-        self._validate_unit_vector(UnitsLeaf('seconds'), Dimension('seconds', 'seconds'), 1)
+        self._validate_unit_vector(UnitsLeaf('seconds'), Dimension('seconds'), 1)
 
     def test_unit_vector_from_direct_construction(self):
         dim = Dimension('pounds')
-        self._validate_unit_vector(UnitVector(dim), dim, 1)
-        self._validate_unit_vector(UnitVector(dim, 3), dim, 3)
+        self._validate_unit_vector(DimensionNode(dim), dim, 1)
+        self._validate_unit_vector(DimensionNode(dim, 3), dim, 3)
 
 
 class FunctorTests(unittest.TestCase):
@@ -146,12 +146,13 @@ class FunctorTests(unittest.TestCase):
 
 
 class StemTests(unittest.TestCase):
+    pass
 
-    def test_basic_dimension_merge(self):
-        compound = Unit('feet') * Unit('feet')
-        import pdb
-        print("\n(compound::{0}) = {1}\n".format(compound.__class__.__name__, repr(compound)))
-        pdb.set_trace()
+    # def test_basic_dimension_merge(self):
+    #     compound = Unit('feet') * Unit('feet')
+    #     import pdb
+    #     print("\n(compound::{0}) = {1}\n".format(compound.__class__.__name__, repr(compound)))
+    #     pdb.set_trace()
 
     # def test_basic_scalar_to_dimension_merge(self):
     #     compound = Unit('feet') * Unit(32)
@@ -173,10 +174,18 @@ class StemTests(unittest.TestCase):
 
 
 class DimensionTests(unittest.TestCase):
-    """
-    Todo in the future
-    """
+
+    def test_nullunit(self):
+        self.assertIsInstance(Dimension(), Dimension)
+        self.assertIsInstance(NullUnit, Dimension)
+        self.assertEqual(Dimension(), Dimension())
+        self.assertEqual(Dimension(), NullUnit)
+        self.assertNotEqual(Dimension('feet'), NullUnit)
+
+
 
     def test_dimension_registry(self):
         """Do this via checking the id() of the returned objects"""
-        pass
+        self.assertTrue(Dimension is NullUnit)
+        feet = Dimension('feet')
+        self.assertTrue(Dimension('feet') is feet)

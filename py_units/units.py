@@ -44,7 +44,7 @@ class Unit(UnitsType, metaclass=UnitMeta):
         if isinstance(value, Number):
             return Scalar(value)
         elif isinstance(value, str):
-            return UnitVector(Dimension(value, value))
+            return DimensionNode(Dimension(value, value))
         else:
             raise UnitsTypeError("Attempted to construct unit for: {0}".format(value))
 
@@ -53,7 +53,7 @@ class Unit(UnitsType, metaclass=UnitMeta):
         if (dimension is NullUnit):
             return Scalar(value, parent)
         else:
-            return UnitVector(dimension, value, parent)
+            return DimensionNode(dimension, value, parent)
 
 
 class UnitsLeaf(Unit):
@@ -68,7 +68,7 @@ class UnitsStem(Unit):
     pass
 
 
-class UnitVector(UnitsLeaf):
+class DimensionNode(UnitsLeaf):
     """Leaf node representing a single unit, with an exponent.
     For example, both `feet` and `seconds^2` would be
     Compound units (such as `feet-)
@@ -137,14 +137,6 @@ class Scalar(UnitsLeaf, ArithmeticSyntaxMixin['Scalar', Number]):
         self.value = value
         self.parent = parent
 
-    def simplify(self):
-        # (1) Check if this can be merged with an adjacent scalar node
-        if simplify.children_match(self.parent):
-            simplify.merge_child_scalars(parent)
-
-        # (2) Migrate Scalar to the leftmost position
-        return self
-
     def __str__(self):
         return str(self.value)
 
@@ -176,15 +168,20 @@ class Multiply(UnitsFunction):
     @classmethod
     def simplify(cls, node):
         if node.left.unit == node.right.unit:
-            # Create new with unit of left, and add exponents
+
             return UnitsLeaf(node.left.units, node.left.exponent + node.right.exponents)
         return node
+
+
+
+
 
 
 class Divide(UnitsFunction):
     function = operator.__truediv__
     short = "/"
     name = "divide"
+
     @classmethod
     def simplify(cls, node):
         if node.left.unit == node.right.unit:
@@ -200,6 +197,7 @@ class UnitsFunctionStem(UnitsStem):
 
     Needs to pick up the simplification rules for multiplying and dividing
     """
+
     def __init__(self, parent: Union[Unit, None],
                  astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
         self.parent = parent

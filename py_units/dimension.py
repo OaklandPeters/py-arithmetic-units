@@ -1,36 +1,43 @@
 import functools
-from typing import Callable, Sequence, Tuple, Union, Optional
+from typing import Union
+
+from .base import UnitMeta
 
 
 class NotPassed:
-    pass
+    """Used to distinguish between when an argument was passed as None, or
+    simply wasn't passed in at all."""
+
 
 @functools.total_ordering
-class Dimension:
+class Dimension(metaclass=UnitMeta):
     """Fundamental value-less unit. 'feet'/'seconds'.
     Should have special handling of NullUnit in the constructor
     """
-    # def __new__(cls, name: Union[None, str], identifier: Union[None, int]):
-    #     if identifier in cls.registry:
-    #         return cls.registry[identifier]
-    #     else:
-    #         self = super(cls).__new__(cls, name, identifier)
-    #         cls.registry[identifier] = self
-    #         return self
+    registry = {}
 
+    def __new__(cls, identifier: Union[None, int, NotPassed] = NotPassed):
+        if identifier in cls.registry:
+            return cls.registry[identifier]
+        else:
+            self = super(cls).__new__(cls, identifier)
+            self.__init__(identifier)
+            cls.registry[identifier] = self
+            return self
 
-    def __init__(self, name: Union[None, str], identifier: Union[None, int, NotPassed] = NotPassed):
+    def __init__(self, identifier: Union[None, int, NotPassed] = NotPassed):
         """Explicitly passing in 'None' for identifier should make this the NullUnit"""
-        self.name = name
-        if identifier is NotPassed:
-            identifier = name
         self.identifier = identifier
 
+    @classmethod
+    def zero(cls):
+        return NullUnit
+
     def __str__(self):
-        return self.name
+        return self.identifier
 
     def __repr__(self):
-        return "{0}({1})".format(self.__class__.__name__, self.name)
+        return "{0}({1})".format(self.__class__.__name__, self.identifier)
 
     def __eq__(self, other):
         if isinstance(other, Dimension):
@@ -43,7 +50,10 @@ class Dimension:
 
     def __lt__(self, other):
         """Only compares Dimensions.
-        Compares as Tuple[str] except treats 'None' as less than
+        Compares as Tuple[str] except treats 'None' as less than all others
+        This is used in giving a standard representation to
+        compound dimensions, such as:
+            feet * pounds  ~  (feet, pounds)   and not (pounds, feet)
         """
         if not isinstance(other, Dimension):
             return NotImplemented
@@ -61,10 +71,5 @@ class Dimension:
                 # default - when both are None treat left as less than right
                 return True
 
-    @classmethod
-    def zero(cls):
-        return NullUnit
 
-    registry = []
-
-NullUnit = Dimension('NullUnit', None)
+NullUnit = Dimension('NullUnit')
