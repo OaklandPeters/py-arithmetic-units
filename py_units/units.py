@@ -165,17 +165,6 @@ class Multiply(UnitsFunction):
     short = "*"
     name = "multiply"
 
-    @classmethod
-    def simplify(cls, node):
-        if node.left.unit == node.right.unit:
-
-            return UnitsLeaf(node.left.units, node.left.exponent + node.right.exponents)
-        return node
-
-
-
-
-
 
 class Divide(UnitsFunction):
     function = operator.__truediv__
@@ -210,5 +199,3 @@ class UnitsFunctionStem(UnitsStem):
             self.left, self.astfunction.short, self.right
         )
 
-    def simplify(self):
-        return self.astfunction.simplify(self)
