@@ -66,14 +66,21 @@ def simplify_tree(node: Unit) -> Unit:
             else:
                 # Stem
 
-
-
-
 def _simplify(node: Unit) -> Unit:
-    pass
+    """Recursive portion of simplification."""
+    if isinstance(node, UnitsLeaf):
+        return node
+    else:
+        v0 = combine_paired_scalars(node)
+        v1 = combine_matching_dimensions(v0)
+        v2 = remove_zero_dimension_children(v1)
+        v3 = remove_zero_scalar_children(v2)
+        return v3
 
 
-def simplify_scalar_nodes(stem: UnitsStem) -> Unit:
+
+
+def combine_paired_scalars(stem: UnitsStem) -> Unit:
     """Check if scalar simplification can be applied"""
     if (isinstance(stem.left, Scalar) and isinstance(stem.right, Scalar)):
         return ScalarFunctor.map(
@@ -84,7 +91,7 @@ def simplify_scalar_nodes(stem: UnitsStem) -> Unit:
     return stem
 
 
-def simplify_dimension_nodes(stem: UnitsStem) -> Unit:
+def combine_matching_dimensions(stem: UnitsStem) -> Unit:
     """Check if dimensional simplification can be applied to a stem."""
     if isinstance(stem.left, DimensionNode) and isinstance(stem.right, DimensionNode):
         if stem.left.dimension == stem.right.dimension:
@@ -95,6 +102,42 @@ def simplify_dimension_nodes(stem: UnitsStem) -> Unit:
                 stem.right
             )
     return stem
+
+
+def is_dimension_zero(unit: Unit) -> bool:
+    if isinstance(stem.left, DimensionNode):
+        if hasattr(unit, 'value'):
+            if unit.value == 0:
+                return True
+    return False
+
+
+def is_scalar_zero(unit: Unit) -> bool:
+    if isinstance(unit, Scalar):
+        if hasattr(unit, 'value'):
+            if unit.value == 0:
+                return True
+    return False
+
+
+def remove_zero_dimension_children(stem: UnitsStem) -> Unit:
+    """Removes at most one child nodes which are DimensionNode
+    with value 0 (~exponent 0)"""
+    if is_dimension_zero(stem.left):
+        return stem.right
+    elif is_dimension_zero(stem.right):
+        return stem.left
+    else:
+        return stem
+
+
+def remove_zero_scalar_children(stem: UnitsStem) -> Unit:
+    if is_scalar_zero(stem.left):
+        return stem.right
+    elif is_scalar_zero(stem.right):
+        return stem.left
+    else:
+        return stem
 
 
 def normalize_tree(stem: UnitsStem):
