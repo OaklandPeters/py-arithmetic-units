@@ -152,50 +152,42 @@ class Scalar(UnitsLeaf, ArithmeticSyntaxMixin['Scalar', Number]):
             return False
 
 
-class UnitsFunction:
-    """Binary function to operate on the tree.
-    Each UnitStem has one function contained in it.
-    UnitsFunction is primary used structuring simplification steps.
-    """
+# class UnitsFunction:
+#     """Binary function to operate on the tree.
+#     Each UnitStem has one function contained in it.
+#     UnitsFunction is primary used structuring simplification steps.
+#     """
+
+# class Multiply(UnitsFunction):
+#     function = operator.__mul__
+#     short = "*"
+#     name = "multiply"
+
+
+# class Divide(UnitsFunction):
+#     function = operator.__truediv__
+#     short = "/"
+#     name = "divide"
 
 
 
-class Multiply(UnitsFunction):
-    function = operator.__mul__
-    short = "*"
-    name = "multiply"
+# class UnitsFunctionStem(UnitsStem):
+#     """
+#     represents a function over the units
+#     You don't actually execute it
 
+#     Needs to pick up the simplification rules for multiplying and dividing
+#     """
 
-class Divide(UnitsFunction):
-    function = operator.__truediv__
-    short = "/"
-    name = "divide"
+#     def __init__(self, parent: Union[Unit, None],
+#                  astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
+#         self.parent = parent
+#         self.astfunction = astfunction
+#         self.left = left
+#         self.right = right
 
-    @classmethod
-    def simplify(cls, node):
-        if node.left.unit == node.right.unit:
-            return UnitsLeaf(node.left.units, node.left.exponent - node.right.exponents).simplify()
-        else:
-            return node
-
-
-class UnitsFunctionStem(UnitsStem):
-    """
-    represents a function over the units
-    You don't actually execute it
-
-    Needs to pick up the simplification rules for multiplying and dividing
-    """
-
-    def __init__(self, parent: Union[Unit, None],
-                 astfunction: UnitsFunction, left: UnitsLeaf, right: UnitsLeaf):
-        self.parent = parent
-        self.astfunction = astfunction
-        self.left = left
-        self.right = right
-
-    def __str__(self):
-        "{0} {1} {2}".format(
-            self.left, self.astfunction.short, self.right
-        )
+#     def __str__(self):
+#         "{0} {1} {2}".format(
+#             self.left, self.astfunction.short, self.right
+#         )
 
