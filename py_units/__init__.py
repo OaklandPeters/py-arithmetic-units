@@ -1,10 +1,13 @@
 from .base import UnitsError, UnitsTypeError, FunctorError, UnitsType, UnitMeta
-from .syntax import Functor, InvariantFunctor, ArithmeticSyntaxMixin
+from .syntax import ArithmeticSyntaxMixin
 from .units import (
     Unit, UnitsLeaf, UnitsStem, DimensionNode,
-    NumberScalarInvariantFunctor, Scalar,
+    NumberScalarInvariantFunctor, Scalar
+)
+from .arithmetic import (
     UnitsFunction, Multiply, Divide, UnitsFunctionStem
 )
+from .functor import Functor, InvariantFunctor
 
 __all__ = (
     UnitsError,
