@@ -13,6 +13,10 @@ class FunctorError(UnitsTypeError):
     pass
 
 
+class OperatorLookupError(UnitsError, LookupError):
+    pass
+
+
 class UnitsType:
     pass
 
@@ -24,3 +28,7 @@ class UnitMeta(GenericMeta):
     """
     def __call__(cls, *args, **kwargs):
         return cls.__call__(*args, **kwargs)
+
+
+class NotPassed:
+    pass
