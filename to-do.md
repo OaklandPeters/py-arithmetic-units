@@ -1,8 +1,16 @@
 
 # Next task
-* Multiplication on UnitsVector to yield stems
-* Then - Stem portion in general
-* IGNORE SIMLIFICATION (for now)
+* Build UnitTree
+* Write unittests for UnitTree - match existing ones closely
+
+# Abstract Tree
+* Split abstract functions up onto component classes:
+    - map
+    - fold
+    - traverse
+    - join
+* Make abstract on Foldable and Functor
+* Split fold function onto the component classes
 
 # Mathematics
 * Change mixin to be more generic across Leaf & Stem
@@ -39,11 +47,14 @@
 * `Scalar.simplify`
     - which basically consists of actually doing math
     - Probably best handled via the external **simplify** module
+* Edge case - simplifying Scalar == 0, but for exponentiation
+    - Ex. (3 * feet) ^ 0 --> ~ Scalar(1)
 
 # Constructors
 * `Dimension` - return `NullUnit` when name/identifier is None
 * handle the case of only one of name/identifier being None
 
+# Edge
 
 # Package Structure
 
