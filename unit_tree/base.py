@@ -30,6 +30,17 @@ class UnitMeta(GenericMeta):
         return cls.__call__(*args, **kwargs)
 
 
+class UnitBase(metaclass=GenericMeta):
+    """
+    Provides convenient access to the meta, and the common __call__ override.
+    """
+    @classmethod
+    def __call__(cls, *args):
+        self = object.__new__(cls)
+        self.__init__(*args)
+        return self
+
+
 class NotPassed:
     pass
 

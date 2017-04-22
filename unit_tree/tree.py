@@ -12,7 +12,7 @@ from typing import (
     Iterator
 )
 
-from .base import UnitMeta, NotPassed, UnitsTypeError, identity
+from .base import UnitMeta, UnitBase, NotPassed, UnitsTypeError, identity
 
 Domain = TypeVar('Domain')
 A = TypeVar('A', bound=Domain)
@@ -25,7 +25,7 @@ TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
 # Actually, TreeFunction[int] works just fine
 
 
-class Tree(Generic[Domain], metaclass=UnitMeta):
+class Tree(Generic[Domain], UnitBase):
     """
     Binary abstract tree.
     Allows for the possibility of the center of a Node having a different
@@ -36,11 +36,11 @@ class Tree(Generic[Domain], metaclass=UnitMeta):
 
     def __new__(cls, value=NotPassed, left=NotPassed, right=NotPassed):
         if value is NotPassed:
-            return Empty()
+            return object.__new__(Empty)
         elif left is NotPassed and right is NotPassed:
-            return Leaf(value)
+            return object.__new__(Leaf)
         else:
-            return Node(value, left, right)
+            return object.__new__(Node)
 
     @classmethod
     def __call__(cls, *args):

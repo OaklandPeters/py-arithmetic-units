@@ -1,11 +1,11 @@
 import functools
 from typing import Union
 
-from .base import UnitMeta, NotPassed
+from .base import UnitMeta, NotPassed, UnitBase
 
 
 @functools.total_ordering
-class Dimension(metaclass=UnitMeta):
+class Dimension(UnitBase):
     """Fundamental value-less unit. 'feet'/'seconds'.
     Should have special handling of NullUnit in the constructor
     """
@@ -15,8 +15,7 @@ class Dimension(metaclass=UnitMeta):
         if identifier in cls.registry:
             return cls.registry[identifier]
         else:
-            self = super(cls).__new__(cls, identifier)
-            self.__init__(identifier)
+            self = object.__new__(cls)
             cls.registry[identifier] = self
             return self
 
