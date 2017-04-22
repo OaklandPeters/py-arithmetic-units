@@ -49,17 +49,24 @@ class Tree(Generic[Domain], UnitBase):
         return self
 
     @classmethod
-    def map(cls, f: DomainFunction, tree: 'Tree[Domain]') -> 'Tree[Domain]':
+    def map(cls, tree: 'Tree[Domain]', f: DomainFunction) -> 'Tree[Domain]':
         """Note - I dont like having map on the parent class Tree dispatch
         on the type of the children -
         because it require that class to know about the internals.
         """
+        def mapper(_tree):
+            return cls.map(_tree, f)
+
         if isinstance(tree, Empty):
             return Empty
         elif isinstance(tree, Leaf):
             return Leaf(f(tree.value))
         elif isinstance(tree, Node):
-            return Node(f(tree.value), cls.map(f, tree.left), cls.map(f, tree.right))
+            return Node(
+                f(tree.value),
+                cls.map(tree.left, f),
+                cls.map(tree.right, f)
+            )
         else:
             raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
@@ -67,10 +74,10 @@ class Tree(Generic[Domain], UnitBase):
 
     @classmethod
     def maybe(cls,
-              f: Callable[['Tree'], Any],
               x: Union['Tree', Domain],
+              f: Callable[['Tree'], Any],
               _else: Callable[[Domain], Any]=identity):
-        if isinstance(x, Tree):
+        if isinstance(x, cls.codomain):
             return f(x)
         else:
             return _else(x)
@@ -95,9 +102,9 @@ class Tree(Generic[Domain], UnitBase):
             # Child classes may want to have something go here
             # And they can override it
             return Node(
-                cls.maybe(tree.value),
-                cls.maybe(tree.left),
-                cls.maybe(tree.right)
+                cls.maybe(tree.value, cls.join),
+                cls.maybe(tree.left, cls.join),
+                cls.maybe(tree.right, cls.join)
             )
             # return Node(
             #     tree.value,
@@ -109,8 +116,9 @@ class Tree(Generic[Domain], UnitBase):
                 tree.__class__.__name__
             ))
 
-    def bind(cls, f: Callable[[Domain], 'Tree[Domain]'],
-             value: Union[Domain, 'Tree[Domain]']) -> 'Tree[Domain]':
+    def bind(cls, value: Union[Domain, 'Tree[Domain]'],
+             f: Callable[[Domain], 'Tree[Domain]'],
+             ) -> 'Tree[Domain]':
         """The point of this is that it supports having either domain or Tree
         as the argument. Especially valuable when you generalize it to *values varargs.
 
@@ -139,11 +147,11 @@ class Tree(Generic[Domain], UnitBase):
         return wrapper
 
     @classmethod
-    def apply(cls, tfunc: TreeFunction, tree: 'Tree[Domain]'):
+    def apply(cls, tree: 'Tree[Domain]', tfunc: TreeFunction):
         return tfunc(tree)
 
     @classmethod
-    def fold(cls, f: Callable[[A, B], B], accumulator: B, tree: 'Tree[A]'):
+    def fold(cls, tree: 'Tree[A]', f: Callable[[A, B], B], accumulator: B):
         if isinstance(tree, Empty):
             return accumulator
         elif isinstance(tree, Leaf):
@@ -163,7 +171,7 @@ class Tree(Generic[Domain], UnitBase):
             ))
 
     @classmethod
-    def traverse(cls, f, tree):
+    def traverse(cls, tree: 'Tree[A]', f: TreeFunction):
         if isinstance(tree, Empty):
             # traverse f Empty = pure Empty
             #  which looks like it would be: return cls.construct(tree)
@@ -186,8 +194,15 @@ class Tree(Generic[Domain], UnitBase):
             ))
 
     @classmethod
-    def zero(cls):
+    def zero(cls) -> 'Tree[A]':
         return Empty()
+
+    @classmethod
+    def identity(cls, tree: 'Tree[A]'):
+        return cls.map(tree, identity)
+
+
+Tree.codomain = Tree
 
 
 class Empty(Tree):
@@ -199,6 +214,9 @@ class Empty(Tree):
             "{0}()", self.__class__.__name__
         )
 
+    def __eq__(self, other):
+        return True if isinstance(other, Empty) else False
+
 
 class Leaf(Generic[D, Domain], Tree[Domain]):
 
@@ -209,6 +227,12 @@ class Leaf(Generic[D, Domain], Tree[Domain]):
         return str.format(
             "{0}({1})", self.__class__.__name__, repr(self.value)
         )
+
+    def __eq__(self, other):
+        if isinstance(other, Leaf):
+            return self.value == other.value
+        else:
+            return False
 
 
 class Node(Generic[C, D, Domain], Tree[Domain]):
@@ -231,8 +255,13 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
                  right: Union[D, Type[NotPassed]] = NotPassed):
         if left is NotPassed:
             left = Empty()
+        elif not isinstance(left, Tree):
+            # This will often wrap it as a Leaf --> Leaf(left)
+            left = Tree(left)
         if right is NotPassed:
             right = Empty()
+        elif not isinstance(right, Tree):
+            right = Tree(right)
         self.value = value
         self.left = left
         self.right = right
@@ -242,6 +271,16 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
             "{0}({1}, {2}, {3})", self.__class__.__name__,
             repr(self.value), repr(self.left), repr(self.right)
         )
+
+    def __eq__(self, other):
+        if isinstance(other, Node):
+            return all((
+                self.value == other.value,
+                self.left == other.left,
+                self.right == other.right
+            ))
+        else:
+            return False
 
 
 # ================================================
