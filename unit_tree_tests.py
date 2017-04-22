@@ -55,15 +55,18 @@ class TreeTests(unittest.TestCase):
             Leaf: True,
             Empty: False
         })
-
+        self.assertEqual(leaf.value, expected_value)
 
     def _validate_node(self, node, expected_value, expected_left, expected_right):
         validate_types(self, node, {
             Tree: True,
-            Node: False,
-            Leaf: True,
+            Node: True,
+            Leaf: False,
             Empty: False
         })
+        self.assertEqual(node.value, expected_value)
+        self.assertEqual(node.left, expected_left)
+        self.assertEqual(node.right, expected_right)
 
     def test_empty(self):
         self._validate_empty(Empty())
