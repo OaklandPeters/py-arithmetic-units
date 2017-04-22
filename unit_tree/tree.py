@@ -26,6 +26,8 @@ TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
 class Tree(typing.Generic[Domain], metaclass=UnitMeta):
     """
     Binary abstract tree.
+    Allows for the possibility of the center of a Node having a different
+    type than Leafs.
     """
     domain: Domain
     codomain: 'Tree'
@@ -100,7 +102,7 @@ class Tree(typing.Generic[Domain], metaclass=UnitMeta):
                 tree.left
             )
         else:
-            UnitsTypeError("{0} is unrecognized subtype of tree".format(
+            raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
             ))
 
@@ -123,9 +125,13 @@ class Tree(typing.Generic[Domain], metaclass=UnitMeta):
                 cls.traverse(f, tree.right)
             )
         else:
-            UnitsTypeError("{0} is unrecognized subtype of tree".format(
+            raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
             ))
+
+    @classmethod
+    def zero(cls):
+        return Empty()
 
 
 class Empty(Tree):
