@@ -135,7 +135,10 @@ class TreeTests(unittest.TestCase):
         after = Tree.join(noddy)
         self.assertEqual(after, node)
 
-
+    def test_type_dispatching(self):
+        # Node(Node(Node('x')))
+        self._validate_node(Node('x'), 'x', Empty(), Empty())
+        self._validate_leaf(Tree('x'), 'x')
 
 
 class UnitTreeTests(unittest.TestCase):
