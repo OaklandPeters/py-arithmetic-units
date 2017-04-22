@@ -7,7 +7,10 @@ I *think* that lift is supposed to generate a tagged function,
 that operates differently.
 
 """
-from typing import Callable, Generic, TypeVar, NewType, Any
+from typing import (
+    Callable, Generic, TypeVar, NewType, Any, Union, Type,
+    Iterator
+)
 
 from .base import UnitMeta, NotPassed, UnitsTypeError, identity
 
@@ -58,8 +61,8 @@ class Tree(Generic[Domain], metaclass=UnitMeta):
 
     @classmethod
     def maybe(cls,
-              f: Callable[[Tree], Any],
-              x: Union[Tree, Domain],
+              f: Callable[['Tree'], Any],
+              x: Union['Tree', Domain],
               _else: Callable[[Domain], Any]=identity):
         if isinstance(x, Tree):
             return f(x)
@@ -100,7 +103,7 @@ class Tree(Generic[Domain], metaclass=UnitMeta):
                 tree.__class__.__name__
             ))
 
-    def bind(cls, f: Callable[Domain, 'Tree[Domain]'],
+    def bind(cls, f: Callable[[Domain], 'Tree[Domain]'],
              value: Union[Domain, 'Tree[Domain]']) -> 'Tree[Domain]':
         """The point of this is that it supports having either domain or Tree
         as the argument. Especially valuable when you generalize it to *values varargs.
@@ -134,7 +137,7 @@ class Tree(Generic[Domain], metaclass=UnitMeta):
         return tfunc(tree)
 
     @classmethod
-    def fold(cls, f: Callable[[A, B], B], accumulator: B, tree: Tree[A]):
+    def fold(cls, f: Callable[[A, B], B], accumulator: B, tree: 'Tree[A]'):
         if isinstance(tree, Empty):
             return accumulator
         elif isinstance(tree, Leaf):
@@ -186,13 +189,13 @@ class Empty(Tree):
         pass
 
 
-class Leaf(Tree):
+class Leaf(Generic[D, Domain], Tree[Domain]):
 
     def __init__(self, value):
         self.value = value
 
 
-class Node(Generic[C, D], Tree[Domain]):
+class Node(Generic[C, D, Domain], Tree[Domain]):
     """
     The types of value and left/right are left very vague, because
     particular tree types may have very different notions of what

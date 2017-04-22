@@ -1,4 +1,4 @@
-from typing import GenericMeta
+from typing import GenericMeta, Any
 
 
 class UnitsError(Exception):
