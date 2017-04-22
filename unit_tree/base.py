@@ -32,3 +32,7 @@ class UnitMeta(GenericMeta):
 
 class NotPassed:
     pass
+
+
+def identity(x: Any) -> Any:
+    return x

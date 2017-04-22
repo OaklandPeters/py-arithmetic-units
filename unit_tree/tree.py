@@ -7,10 +7,9 @@ I *think* that lift is supposed to generate a tagged function,
 that operates differently.
 
 """
+from typing import Callable, Generic, TypeVar, NewType, Any
 
-from .typing import Callable, Generic, TypeVar, NewType
-
-from .base import UnitMeta, NotPassed, UnitsTypeError
+from .base import UnitMeta, NotPassed, UnitsTypeError, identity
 
 Domain = TypeVar('Domain')
 A = TypeVar('A', bound=Domain)
@@ -23,7 +22,7 @@ TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
 # Actually, TreeFunction[int] works just fine
 
 
-class Tree(typing.Generic[Domain], metaclass=UnitMeta):
+class Tree(Generic[Domain], metaclass=UnitMeta):
     """
     Binary abstract tree.
     Allows for the possibility of the center of a Node having a different
