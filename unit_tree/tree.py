@@ -52,15 +52,63 @@ class Tree(Generic[Domain], metaclass=UnitMeta):
         elif isinstance(tree, Node):
             return Node(f(tree.value), cls.map(f, tree.left), cls.map(f, tree.right))
         else:
-            UnitsTypeError("{0} is unrecognized subtype of tree".format(
+            raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
             ))
 
-    def bind(cls, f: Callable[Domain, Tree[Domain]], value: Union[Domain, 'Tree[Domain]']):
+    @classmethod
+    def maybe(cls,
+              f: Callable[[Tree], Any],
+              x: Union[Tree, Domain],
+              _else: Callable[[Domain], Any]=identity):
+        if isinstance(x, Tree):
+            return f(x)
+        else:
+            return _else(x)
+
+    @classmethod
+    def join(cls, tree: 'Tree[Domain]'):
+        """
+        I think the key here is that it depends on what the children are
+        """
+        if isinstance(tree, Empty):
+            return None
+        elif isinstance(tree, Leaf):
+            if isinstance(tree.value, Tree):
+                # Leaf (Empty()|Leaf(x)|Node(x,l,r)) --> Empty()|Leaf(x)|Node(x,l,r)
+                return tree.value.join()
+            else:
+                # Leaf (non-Tree) --> no change
+                return Leaf(tree.value)
+        elif isinstance(tree, Node):
+            # Hard case - not sure what should be done here
+            # Perhaps... nothing?
+            # Child classes may want to have something go here
+            # And they can override it
+            return Node(
+                cls.maybe(tree.value),
+                cls.maybe(tree.left),
+                cls.maybe(tree.right)
+            )
+            # return Node(
+            #     tree.value,
+            #     tree.left,
+            #     tree.right
+            # )
+        else:
+            raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
+                tree.__class__.__name__
+            ))
+
+    def bind(cls, f: Callable[Domain, 'Tree[Domain]'],
+             value: Union[Domain, 'Tree[Domain]']) -> 'Tree[Domain]':
         """The point of this is that it supports having either domain or Tree
         as the argument. Especially valuable when you generalize it to *values varargs.
 
-        The hard part, is:
+        Bind needs to map the internals of 'value', put it into a tree object
+
+        Key differences with Tree.map:
+        * Possibility of a f(Leaf(...)) --> Node or Empty
         """
         pass
 
