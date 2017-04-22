@@ -43,6 +43,12 @@ class Tree(Generic[Domain], metaclass=UnitMeta):
             return Node(value, left, right)
 
     @classmethod
+    def __call__(cls, *args):
+        self = object.__new__(cls)
+        self.__init__(*args)
+        return self
+
+    @classmethod
     def map(cls, f: DomainFunction, tree: 'Tree[Domain]') -> 'Tree[Domain]':
         """Note - I dont like having map on the parent class Tree dispatch
         on the type of the children -
