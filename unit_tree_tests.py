@@ -116,8 +116,10 @@ class TreeTests(unittest.TestCase):
         self.assertEqual(Node(None, None, None), Node(None, None, None))
 
     def test_map(self):
-        before = Node(1, 2, 3)
-        after = Tree.map(before, lambda x: x+3)
+        self.assertEqual(
+            Tree.map(Node(1, 2, 3), lambda x: x+3),
+            Node(4, 5, 6)
+        )
 
 
 
