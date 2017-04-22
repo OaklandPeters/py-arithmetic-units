@@ -121,6 +121,20 @@ class TreeTests(unittest.TestCase):
             Node(4, 5, 6)
         )
 
+    def test_join_leaf(self):
+        pile = Leaf(Leaf(Leaf(Leaf('x'))))
+        out = Tree.join(pile)
+        self.assertEqual(out, Leaf('x'))
+
+        thing = Leaf(Leaf(Leaf(Empty())))
+        nothing = Tree.join(thing)
+        self.assertEqual(nothing, None)
+
+        node = Node(1, 2, 3)
+        noddy = Leaf(Leaf(Leaf(node)))
+        after = Tree.join(noddy)
+        self.assertEqual(after, node)
+
 
 
 
