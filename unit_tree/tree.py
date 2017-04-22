@@ -194,11 +194,21 @@ class Empty(Tree):
     def __init__(self):
         pass
 
+    def __repr__(self):
+        return str.format(
+            "{0}()", self.__class__.__name__
+        )
+
 
 class Leaf(Generic[D, Domain], Tree[Domain]):
 
     def __init__(self, value):
         self.value = value
+
+    def __repr__(self):
+        return str.format(
+            "{0}({1})", self.__class__.__name__, repr(self.value)
+        )
 
 
 class Node(Generic[C, D, Domain], Tree[Domain]):
@@ -226,6 +236,12 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
         self.value = value
         self.left = left
         self.right = right
+
+    def __repr__(self):
+        return str.format(
+            "{0}({1}, {2}, {3})", self.__class__.__name__,
+            repr(self.value), repr(self.left), repr(self.right)
+        )
 
 
 # ================================================
