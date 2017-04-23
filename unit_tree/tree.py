@@ -54,16 +54,13 @@ class Tree(Generic[Domain], UnitBase):
         on the type of the children -
         because it require that class to know about the internals.
         """
-        def mapper(_tree):
-            return cls.map(_tree, f)
-
         if isinstance(tree, Empty):
             return Empty
         elif isinstance(tree, Leaf):
             return Leaf(f(tree.value))
         elif isinstance(tree, Node):
             return Node(
-                f(tree.value),
+                cls.map(tree.value, f),
                 cls.map(tree.left, f),
                 cls.map(tree.right, f)
             )
@@ -75,12 +72,21 @@ class Tree(Generic[Domain], UnitBase):
     @classmethod
     def maybe(cls,
               x: Union['Tree', Domain],
-              f: Callable[['Tree'], Any],
-              _else: Callable[[Domain], Any]=identity):
+              _do: Callable[['Tree'], Any]=identity,
+              _not: Callable[[Domain], Any]=identity):
+        """Sugar meta-function. Conditionally apply a function to the input
+        when it is and/or is-not a type of Tree.
+        Note - this is very different than the Maybe Monad
+        """
         if isinstance(x, cls.codomain):
-            return f(x)
+            return _do(x)
+        elif isinstance(x, Domain):
+            return _not(x)
         else:
-            return _else(x)
+            raise UnitsTypeError(str.format(
+                "{0} is not a subtype of tree, nor in the domain '{1}'",
+                x.__class__.__name__, Domain
+            ))
 
     @classmethod
     def join(cls, tree: 'Tree[Domain]'):
@@ -273,18 +279,21 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
     def __init__(self, value,
                  left: Union[D, Type[NotPassed]] = NotPassed,
                  right: Union[D, Type[NotPassed]] = NotPassed):
-        if left is NotPassed:
-            left = Empty()
-        elif not isinstance(left, Tree):
-            # This will often wrap it as a Leaf --> Leaf(left)
-            left = Tree(left)
-        if right is NotPassed:
-            right = Empty()
-        elif not isinstance(right, Tree):
-            right = Tree(right)
-        self.value = value
-        self.left = left
-        self.right = right
+        # if left is NotPassed:
+        #     left = Empty()
+        # elif not isinstance(left, Tree):
+        #     # This will often wrap it as a Leaf --> Leaf(left)
+        #     left = Tree(left)
+        # if right is NotPassed:
+        #     right = Empty()
+        # elif not isinstance(right, Tree):
+        #     right = Tree(right)
+
+        # If inputs are not Tree type - wrap them in one
+        #   Generally results in putting things in a Leaf
+        self.value = self.maybe(value, _not=self.construct)
+        self.left = self.maybe(left, _not=self.construct)
+        self.right = self.maybe(right, _not=self.construct)
 
     def __repr__(self):
         return str.format(
