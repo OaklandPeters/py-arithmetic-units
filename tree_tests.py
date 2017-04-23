@@ -1,17 +1,16 @@
 """
 Run tests with:
 cd py-arithmetic-units\
-py -m unittest unit_tree_tests
+py -m unittest tree_tests
 """
 import unittest
 from typing import Mapping
-# from numbers import Number
 
-# from unit_tree.dimension import Dimension, NullUnit
 from unit_tree import (
     Tree, Empty, Leaf, Node, bfs, dfs,
     UnitsError, UnitsTypeError, FunctorError, OperatorLookupError,
-    UnitsType, UnitMeta, NotPassed
+    UnitsType, UnitMeta, NotPassed,
+    Dimension, NullUnit
 )
 
 

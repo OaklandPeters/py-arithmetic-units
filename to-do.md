@@ -1,5 +1,6 @@
 
 # Next task
+* Copy over more useful tests from old units_test.py
 * Build UnitTree
 * Write unittests for UnitTree - match existing ones closely
 * AFTER unittests - try moving methods onto child classes for clarity
@@ -9,6 +10,10 @@
 
 # Cleanup
 * Remove __call__ from Tree - inherited one from UnitBase should be fine
+
+# Mathematical correctness
+* Make the Domain of Tree correct - via (,) | (A,) | (B, A, A)
+    - I'm not sure how to provide type for empty tuple ~ Domain for Empty
 
 # Abstract Tree
 * Add repr and str functions
