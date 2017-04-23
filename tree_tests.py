@@ -74,7 +74,7 @@ class TreeTests(unittest.TestCase):
         self._validate_leaf(Leaf('x'), 'x')
 
     def test_node(self):
-        self._validate_node(Node(1, 2, 3), 1, Leaf(2), Leaf(3))
+        self._validate_node(Node(1, 2, 3), Leaf(1), Leaf(2), Leaf(3))
 
     def test_maybe(self):
         """ Confirm that the isinstance(x, cls.codomain) actually works"""
@@ -94,19 +94,25 @@ class TreeTests(unittest.TestCase):
         self.assertNotEqual(Leaf(5), Empty())
         self.assertEqual(Leaf(None), Leaf(None))
         self.assertNotEqual(Leaf(None), Empty)
+
+    def test_leaf_inheritance(self):
         class WeirdLeaf(Leaf):
             def __new__(cls, value, more):
                 self = object.__new__(cls)
                 self.__init__(value, more)
                 return self
+
             def __init__(self, value, more):
                 self.value = value
                 self.more = more
-        self.assertEqual(Leaf('x'), WeirdLeaf('x', 'y'))
+
+        self._validate_leaf(WeirdLeaf('x', 'y'), 'x')
+        self.assertEqual(WeirdLeaf('x', 'y'), Leaf('x'))
 
     def test_node_equality(self):
         self.assertEqual(Node(1, 2, 3), Node(1, 2, 3))
-        self.assertEqual(Node(1, 2, 3),
+        self.assertEqual(
+            Node(1, 2, 3),
             Node(1, Leaf(2), Leaf(3))
         )
         self.assertEqual(Node(1, 2, None), Node(1, Leaf(2), Leaf(None)))
@@ -116,7 +122,7 @@ class TreeTests(unittest.TestCase):
 
     def test_map(self):
         self.assertEqual(
-            Tree.map(Node(1, 2, 3), lambda x: x+3),
+            Tree.map(Node(1, 2, 3), lambda x: x + 3),
             Node(4, 5, 6)
         )
 
@@ -136,7 +142,7 @@ class TreeTests(unittest.TestCase):
 
     def test_type_dispatching(self):
         # Node(Node(Node('x')))
-        self._validate_node(Node('x'), 'x', Empty(), Empty())
+        self._validate_node(Node('x'), Leaf('x'), Empty(), Empty())
         self._validate_leaf(Tree('x'), 'x')
 
 
