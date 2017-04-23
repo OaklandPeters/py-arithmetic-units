@@ -22,15 +22,17 @@
 * Make abstract on Foldable and Functor
 * Split fold function onto the component classes
 
-# Mathematics
-
 # Simplification
-* Integrate simplification
-* Handle which operators are displayed on which node types via syntax mixins
-* Semi Hard Problem: replacing node, while maintaining child-ref in parent
-    - Possibly some Traversable-related chicanary
-    - Solve via: bfs/dfs iterator, and immutablity (~Traversable chicanery)
-
+* Copy usable portions of py_units/simplfy.py --> unit_tree/simplify.py
+* Write scalar pair application simplify
+    - Unittests for it, without simplification runner
+* Write simplification runner, to be triggered inside Tree.simplify(rules)
+    - New class Rule ~ (Pattern, ArgSpec, ArgGetter, Replacer)
+        + simple structure, avoid monadic strangeness
+        + class Pattern ~ Predicate[Tree] -> bool
+    - class Rules ~ List[Rule]
+* INITIALLY - avoid pattern-recognition problem, by only specifying purely local patterns
+    - LocalPattern - only looks at Tree elm its given, and that elm's immediate children
 
 # Advanced - and unnecessary for now:
 * operators on `Dimension`, that promotes it to a Leaf
