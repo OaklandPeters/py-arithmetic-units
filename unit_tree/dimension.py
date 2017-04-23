@@ -1,15 +1,19 @@
 import functools
 from typing import Union
 
-from .base import UnitMeta, NotPassed, UnitBase
+from .base import TreeMeta, TreeBase, NotPassed
 
 
 @functools.total_ordering
-class Dimension(UnitBase):
+class Dimension(TreeBase):
     """Fundamental value-less unit. 'feet'/'seconds'.
     Should have special handling of NullUnit in the constructor
     """
     registry = {}
+
+    # @classmethod
+    # def __call__(cls, *args, **kwargs):
+    #     return cls.__call__(*args, **kwargs)
 
     def __new__(cls, identifier: Union[None, int, NotPassed] = NotPassed):
         if identifier in cls.registry:

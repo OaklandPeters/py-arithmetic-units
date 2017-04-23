@@ -12,7 +12,7 @@ from typing import (
     Iterator
 )
 
-from .base import UnitMeta, UnitBase, NotPassed, UnitsTypeError, identity
+from .base import TreeMeta, TreeBase, NotPassed, UnitsTypeError, identity
 
 Domain = TypeVar('Domain')
 A = TypeVar('A', bound=Domain)
@@ -23,7 +23,7 @@ DomainFunction = Callable[[Domain], Domain]
 TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
 
 
-class Tree(Generic[Domain], UnitBase):
+class Tree(Generic[Domain], TreeBase):
     """
     Binary abstract tree.
     Allows for the possibility of the center of a Node having a different
@@ -43,7 +43,10 @@ class Tree(Generic[Domain], UnitBase):
 
     @classmethod
     def __call__(cls, *args):
-        self = object.__new__(cls)
+        if cls is Tree:
+            self = Tree.__new__(cls, *args)
+        else:
+            self = object.__new__(cls)
         self.__init__(*args)
         return self
 
@@ -112,6 +115,10 @@ class Tree(Generic[Domain], UnitBase):
                 cls.maybe(tree.right, cls.join)
             )
         else:
+            import pdb
+            print("\n(tree::{0}) = {1}\n".format(tree.__class__.__name__, repr(tree)))
+            pdb.set_trace()
+
             raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
             ))
@@ -130,7 +137,7 @@ class Tree(Generic[Domain], UnitBase):
         return cls.join(cls.map(value, f))
 
     @classmethod
-    def construct(cls, domain: Domain) -> 'Tree[Domain]':
+    def construct(cls, domain: Domain = NotPassed) -> 'Tree[Domain]':
         """Construct a Tree element out of a Domain element"""
         # Handle an edge case - where domain is 'NotPassed', but
         # we need to prevent passing 'NotPassed' into Empty.__init__

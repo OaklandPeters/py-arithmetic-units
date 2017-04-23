@@ -17,16 +17,16 @@ class OperatorLookupError(UnitsError, LookupError):
     pass
 
 
-class UnitMeta(GenericMeta):
+class TreeMeta(GenericMeta):
     """
     This inherits from GenericMeta instead of 'type' - to solve metaclass conflicts
-    with classes which use metaclass=UnitMeta, but also need to inherit from 'Generic'
+    with classes which use metaclass=TreeMeta, but also need to inherit from 'Generic'
     """
     def __call__(cls, *args, **kwargs):
         return cls.__call__(*args, **kwargs)
 
 
-class TreeBase(metaclass=GenericMeta):
+class TreeBase(metaclass=TreeMeta):
     """
     Provides convenient access to the meta, and the common __call__ override.
     """
