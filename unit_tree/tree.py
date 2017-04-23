@@ -130,7 +130,13 @@ class Tree(Generic[Domain], UnitBase):
 
     @classmethod
     def construct(cls, domain: Domain) -> 'Tree[Domain]':
-        return Tree(domain)
+        """Construct a Tree element out of a Domain element"""
+        # Handle an edge case - where domain is 'NotPassed', but
+        # we need to prevent passing 'NotPassed' into Empty.__init__
+        if domain is NotPassed:
+            return Tree()
+        else:
+            return Tree(domain)
 
     @classmethod
     def lift(cls, dfunc: DomainFunction) -> TreeFunction:
