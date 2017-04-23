@@ -33,6 +33,22 @@ def validate_types(test, subject, type_mapping: Mapping[type, bool]):
             )
 
 
+class DimensionTests(unittest.TestCase):
+
+    def test_nullunit(self):
+        self.assertIsInstance(Dimension(), Dimension)
+        self.assertIsInstance(NullUnit, Dimension)
+        self.assertEqual(Dimension(), Dimension())
+        self.assertEqual(Dimension(), NullUnit)
+        self.assertNotEqual(Dimension('feet'), NullUnit)
+
+    def test_dimension_registry(self):
+        """Do this via checking the id() of the returned objects"""
+        self.assertTrue(Dimension is NullUnit)
+        feet = Dimension('feet')
+        self.assertTrue(Dimension('feet') is feet)
+
+
 class TreeTests(unittest.TestCase):
     """
     Methods to test:
@@ -147,7 +163,7 @@ class TreeTests(unittest.TestCase):
 
 
 class UnitTreeTests(unittest.TestCase):
-
+    pass
     # def test_multiplication_syntax_chaining(self):
     #     # Also - test that the nodes are Multiplication <: UnitFunction <: TreeFunction
     #     chained = UnitTree(5) * 4 * 3
@@ -155,4 +171,66 @@ class UnitTreeTests(unittest.TestCase):
 
     # def test_scalar_simplification(self):
     #     pass
-    pass
+
+    # def test_basic_dimension_merge(self):
+    #     compound = Unit('feet') * Unit('feet')
+    #     import pdb
+    #     print("\n(compound::{0}) = {1}\n".format(compound.__class__.__name__, repr(compound)))
+    #     pdb.set_trace()
+
+    # def test_basic_scalar_to_dimension_merge(self):
+    #     compound = Unit('feet') * Unit(32)
+    #     import pdb
+    #     print("\n(compound::{0}) = {1}\n".format(compound.__class__.__name__, repr(compound)))
+    #     pdb.set_trace()
+
+    # def test_real_world_syntax_usage(self):
+    #     Dollars = Unit('Dollars')
+    #     Threads = Unit('Threads')
+    #     # This step requires stems to work
+    #     PpR = (44 * Dollars) / Threads
+    #     RpB = (23 * Threads)
+    #     # This step requires simplification to work
+    #     CtB = PpR * RpB
+    #     self.assertEqual(CtB, Dollars(44 * 23))
+    #
+    # (feet * seconds / feet * (pounds / (feet * feet)))
+
+
+# class UnitTreeOperatorTests(unittest.TestCase):
+#     def test_syntax_mixin_map(self):
+#         pairs = [(1, 5), (3, 7), (9, -2), (0, 11.5)]
+#         for a, b in pairs:
+#             self.assertEqual(Scalar(a) + Scalar(b), Scalar(a + b))
+#             self.assertEqual(Scalar(a) - Scalar(b), Scalar(a - b))
+#             self.assertEqual(Scalar(a) * Scalar(b), Scalar(a * b))
+#             self.assertEqual(Scalar(a) / Scalar(b), Scalar(a / b))
+#             self.assertEqual(Scalar(a) ** Scalar(b), Scalar(a ** b))
+#             self.assertEqual(Scalar(a) % Scalar(b), Scalar(a % b))
+
+#     def test_syntax_mixin_apply(self):
+#         # Confirm type
+#         self.assertIsInstance(Scalar(5) + 3, Scalar)
+
+#         # Check mathematics and composition
+#         pairs = [(1, 5), (3, 7), (9, -2), (0, 11.5)]
+#         for a, b in pairs:
+#             self.assertEqual(Scalar(a) + b, Scalar(a + b))
+#             self.assertEqual(Scalar(a) - b, Scalar(a - b))
+#             self.assertEqual(Scalar(a) * b, Scalar(a * b))
+#             self.assertEqual(Scalar(a) / b, Scalar(a / b))
+#             self.assertEqual(Scalar(a) ** b, Scalar(a ** b))
+#             self.assertEqual(Scalar(a) % b, Scalar(a % b))
+
+#             # Test reversed operators
+#             self.assertEqual(a + Scalar(b), Scalar(a + b))
+#             self.assertEqual(a - Scalar(b), Scalar(a - b))
+#             self.assertEqual(a * Scalar(b), Scalar(a * b))
+#             self.assertEqual(a / Scalar(b), Scalar(a / b))
+#             self.assertEqual(a ** Scalar(b), Scalar(a ** b))
+#             self.assertEqual(a % Scalar(b), Scalar(a % b))
+
+#     def test_long_chaining(self):
+#         waaaat = Scalar(2) + 3 + 4 + 5
+#         self.assertIsInstance(waaaat, Scalar)
+#         self.assertEqual(waaaat, Scalar(2 + 3 + 4 + 5))
