@@ -21,8 +21,6 @@ C = TypeVar('C', bound=Domain)
 D = TypeVar('D', bound=Domain)
 DomainFunction = Callable[[Domain], Domain]
 TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
-# I need: TreeFunction[A] = Callable[[Tree[A]], Tree[A]]
-# Actually, TreeFunction[int] works just fine
 
 
 class Tree(Generic[Domain], UnitBase):
@@ -102,21 +100,16 @@ class Tree(Generic[Domain], UnitBase):
             else:
                 # Leaf (non-Tree) --> no change
                 return Leaf(tree.value)
+            # More succicent expression:
+            # return cls.maybe(tree.value, cls.join, construct)
         elif isinstance(tree, Node):
-            # Hard case - not sure what should be done here
-            # Perhaps... nothing?
-            # Child classes may want to have something go here
-            # And they can override it
+            # Structure of Node is not changed - even when one child is empty
+            # Child classes may want to override and expand this behavior
             return Node(
                 cls.maybe(tree.value, cls.join),
                 cls.maybe(tree.left, cls.join),
                 cls.maybe(tree.right, cls.join)
             )
-            # return Node(
-            #     tree.value,
-            #     tree.left,
-            #     tree.right
-            # )
         else:
             raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
@@ -133,7 +126,7 @@ class Tree(Generic[Domain], UnitBase):
         Key differences with Tree.map:
         * Possibility of a f(Leaf(...)) --> Node or Empty
         """
-        pass
+        return cls.join(cls.map(value, f))
 
     @classmethod
     def construct(cls, domain: Domain) -> 'Tree[Domain]':

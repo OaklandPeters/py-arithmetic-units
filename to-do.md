@@ -7,6 +7,9 @@
 # Bugfixes
 * In Tree - should not directly call Empty/Leaf/Node as constructors - messes up inheritance
 
+# Cleanup
+* Remove __call__ from Tree - inherited one from UnitBase should be fine
+
 # Abstract Tree
 * Add repr and str functions
 * Add equality comparisons for Empty, Leaf, Node
