@@ -1,7 +1,8 @@
 from .base import (
     UnitsError, UnitsTypeError, FunctorError, OperatorLookupError,
     UnitsType, UnitMeta, NotPassed, identity)
-from .tree import (Tree, Empty, Leaf, Node, bfs, dfs)
+from .tree import (Tree, Empty, Leaf, Node)
+from .support import (bfs, dfs)
 from .dimension import (Dimension, NullUnit)
 from .unit_tree import (UnitTree, UnitEmpty, UnitLeaf, UnitNode)
 
