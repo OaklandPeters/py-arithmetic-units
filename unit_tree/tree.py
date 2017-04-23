@@ -29,6 +29,7 @@ class Tree(Generic[Domain], UnitBase):
     Allows for the possibility of the center of a Node having a different
     type than Leafs.
     """
+    # Child classes need to override Domain
     domain: Domain
     codomain: 'Tree'
 
@@ -78,7 +79,7 @@ class Tree(Generic[Domain], UnitBase):
         """
         if isinstance(x, cls.codomain):
             return _do(x)
-        elif isinstance(x, Domain):
+        elif isinstance(x, cls.domain):
             return _not(x)
         else:
             raise UnitsTypeError(str.format(
@@ -207,6 +208,8 @@ class Tree(Generic[Domain], UnitBase):
         return cls.map(tree, identity)
 
 
+# Tree.domain should be overridden by child-classes
+Tree.domain = object
 Tree.codomain = Tree
 
 
