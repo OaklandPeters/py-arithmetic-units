@@ -17,10 +17,6 @@ class OperatorLookupError(UnitsError, LookupError):
     pass
 
 
-class UnitsType:
-    pass
-
-
 class UnitMeta(GenericMeta):
     """
     This inherits from GenericMeta instead of 'type' - to solve metaclass conflicts
@@ -30,7 +26,7 @@ class UnitMeta(GenericMeta):
         return cls.__call__(*args, **kwargs)
 
 
-class UnitBase(metaclass=GenericMeta):
+class TreeBase(metaclass=GenericMeta):
     """
     Provides convenient access to the meta, and the common __call__ override.
     """
@@ -39,6 +35,10 @@ class UnitBase(metaclass=GenericMeta):
         self = object.__new__(cls)
         self.__init__(*args)
         return self
+
+
+class UnitBase(TreeBase):
+    pass
 
 
 class NotPassed:

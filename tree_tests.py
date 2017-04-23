@@ -7,10 +7,11 @@ import unittest
 from typing import Mapping
 
 from unit_tree import (
-    Tree, Empty, Leaf, Node, bfs, dfs,
-    UnitsError, UnitsTypeError, FunctorError, OperatorLookupError,
+    Tree, Empty, Leaf, Node,
     UnitsType, UnitMeta, NotPassed,
-    Dimension, NullUnit
+    TreeBase, UnitBase,
+    Dimension, NullUnit,
+    UnitTree, UnitNode, UnitLeaf, UnitEmpty
 )
 
 
@@ -55,8 +56,11 @@ class TreeTests(unittest.TestCase):
     map, bind, construct, lift, apply, fold, traverse, zero
     """
 
+    construct = Tree.construct()
+
     def _validate_empty(self, empty):
         validate_types(self, empty, {
+            TreeBase: True,
             Tree: True,
             Node: False,
             Leaf: False,
@@ -65,6 +69,7 @@ class TreeTests(unittest.TestCase):
 
     def _validate_leaf(self, leaf, expected_value):
         validate_types(self, leaf, {
+            TreeBase: True,
             Tree: True,
             Node: False,
             Leaf: True,
@@ -74,6 +79,7 @@ class TreeTests(unittest.TestCase):
 
     def _validate_node(self, node, expected_value, expected_left, expected_right):
         validate_types(self, node, {
+            TreeBase: True,
             Tree: True,
             Node: True,
             Leaf: False,
@@ -163,7 +169,59 @@ class TreeTests(unittest.TestCase):
 
 
 class UnitTreeTests(unittest.TestCase):
-    pass
+
+    construct = UnitTree.construct
+
+    def _validate_empty(self, empty):
+        validate_types(self, empty, {
+            TreeBase: True,
+            Tree: True,
+            Node: False,
+            Leaf: False,
+            Empty: True,
+            UnitBase: True,
+            UnitTree: True,
+            UnitNode: False,
+            UnitLeaf: False,
+            UnitEmpty: True,
+        })
+        self.assertEqual(empty, self.construct())
+
+    def _validate_leaf(self, leaf, expected_value):
+        validate_types(self, leaf, {
+            TreeBase: True,
+            Tree: True,
+            Node: False,
+            Leaf: True,
+            Empty: False,
+            UnitBase: True,
+            UnitTree: True,
+            UnitNode: False,
+            UnitLeaf: True,
+            UnitEmpty: False,
+        })
+        self.assertEqual(leaf.value, expected_value)
+
+    def _validate_node(self, node, expected_value, expected_left, expected_right):
+        validate_types(self, node, {
+            TreeBase: True,
+            Tree: True,
+            Node: True,
+            Leaf: False,
+            Empty: False,
+            UnitBase: True,
+            UnitTree: True,
+            UnitNode: False,
+            UnitLeaf: False,
+            UnitEmpty: True,
+        })
+        self.assertEqual(node.value, expected_value)
+        self.assertEqual(node.left, expected_left)
+        self.assertEqual(node.right, expected_right)
+
+    def test_unit_empty(self):
+        self._validate_empty(Empty())
+        self._validate_empty(self.construct())
     # def test_multiplication_syntax_chaining(self):
     #     # Also - test that the nodes are Multiplication <: UnitFunction <: TreeFunction
     #     chained = UnitTree(5) * 4 * 3
