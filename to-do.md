@@ -1,12 +1,23 @@
 
 # Next task
-* Copy over more useful tests from old units_test.py
-* Build UnitTree
-* Write unittests for UnitTree - match existing ones closely
-* AFTER unittests - try moving methods onto child classes for clarity
+* Subclass stubs
+* unittests for subclass stub constructors & typing
+
+# Building UnitTree
+* Subclass Tree versions:
+    - UnitTree
+    - UnitNode
+        + UnitFunction
+            * Probably needs own build step
+        + Restrict type - UnitNode.value must be UnitFunction
+    - UnitLeaf
+        + Contains dimension
+    - UnitEmpty
+* Write unittests for UnitTree
+    - Related - Tree methods - no directly call Empty/Leaf/Node as constructors
+        + messes up inheritance
 
 # Bugfixes
-* In Tree - should not directly call Empty/Leaf/Node as constructors - messes up inheritance
 
 # Cleanup
 * Remove __call__ from Tree - inherited one from UnitBase should be fine
@@ -14,18 +25,11 @@
 # Mathematical correctness
 * Make the Domain of Tree correct - via (,) | (A,) | (B, A, A)
     - I'm not sure how to provide type for empty tuple ~ Domain for Empty
-
-# Abstract Tree
-* Add repr and str functions
-* Add equality comparisons for Empty, Leaf, Node
-    - Add unittests
-* Split abstract functions up onto component classes:
+* AFTER UnitTree unittests - try Splitting abstract functions up onto child classes
     - map
     - fold
     - traverse
     - join
-* Make abstract on Foldable and Functor
-* Split fold function onto the component classes
 
 # Simplification
 * Copy usable portions of py_units/simplfy.py --> unit_tree/simplify.py
@@ -38,6 +42,3 @@
     - class Rules ~ List[Rule]
 * INITIALLY - avoid pattern-recognition problem, by only specifying purely local patterns
     - LocalPattern - only looks at Tree elm its given, and that elm's immediate children
-
-# Advanced - and unnecessary for now:
-* operators on `Dimension`, that promotes it to a Leaf
