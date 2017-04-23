@@ -281,16 +281,6 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
     def __init__(self, value,
                  left: Union[D, Type[NotPassed]] = NotPassed,
                  right: Union[D, Type[NotPassed]] = NotPassed):
-        # if left is NotPassed:
-        #     left = Empty()
-        # elif not isinstance(left, Tree):
-        #     # This will often wrap it as a Leaf --> Leaf(left)
-        #     left = Tree(left)
-        # if right is NotPassed:
-        #     right = Empty()
-        # elif not isinstance(right, Tree):
-        #     right = Tree(right)
-
         # If inputs are not Tree type - wrap them in one
         #   Generally results in putting things in a Leaf
         self.value = self.maybe(value, _not=self.construct)
@@ -312,42 +302,3 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
             ))
         else:
             return False
-
-
-# ================================================
-#           Supporting functions
-# ================================================
-
-def dfs(tree: Tree[A]) -> Iterator[A]:
-    if isinstance(tree, Empty):
-        pass
-    elif isinstance(tree, Leaf):
-        yield tree.value
-    elif isinstance(tree, Node):
-        yield from dfs(tree.left)
-        yield from dfs(tree.right)
-        yield tree.value
-    else:
-        raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
-            tree.__class__.__name__
-        ))
-
-
-def bfs(tree: Tree[A]) -> Iterator[A]:
-    tree_list = [tree]
-    while tree_list:
-        new_tree_list = []
-        for tree in tree_list:
-            if isinstance(tree, Empty):
-                pass
-            elif isinstance(tree, Leaf):
-                yield tree.value
-            elif isinstance(tree, Node):
-                yield tree.value
-                new_tree_list.append(tree.left)
-                new_tree_list.append(tree.right)
-            else:
-                raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
-                    tree.__class__.__name__
-                ))
-        tree_list = new_tree_list
