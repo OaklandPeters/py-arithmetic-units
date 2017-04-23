@@ -111,6 +111,17 @@ class TreeTests(unittest.TestCase):
         self.assertEqual(Leaf(None), Leaf(None))
         self.assertNotEqual(Leaf(None), Empty)
 
+    def test_node_equality(self):
+        self.assertEqual(Node(1, 2, 3), Node(1, 2, 3))
+        self.assertEqual(
+            Node(1, 2, 3),
+            Node(1, Leaf(2), Leaf(3))
+        )
+        self.assertEqual(Node(1, 2, None), Node(1, Leaf(2), Leaf(None)))
+        self.assertNotEqual(Node('x', 'y'), ('x', 'y'))
+        self.assertNotEqual(Node(3, None, None), Leaf(3))
+        self.assertEqual(Node(None, None, None), Node(None, None, None))
+
     def test_leaf_inheritance(self):
         class WeirdLeaf(Leaf):
             def __new__(cls, value, more):
@@ -124,17 +135,6 @@ class TreeTests(unittest.TestCase):
 
         self._validate_leaf(WeirdLeaf('x', 'y'), 'x')
         self.assertEqual(WeirdLeaf('x', 'y'), Leaf('x'))
-
-    def test_node_equality(self):
-        self.assertEqual(Node(1, 2, 3), Node(1, 2, 3))
-        self.assertEqual(
-            Node(1, 2, 3),
-            Node(1, Leaf(2), Leaf(3))
-        )
-        self.assertEqual(Node(1, 2, None), Node(1, Leaf(2), Leaf(None)))
-        self.assertNotEqual(Node('x', 'y'), ('x', 'y'))
-        self.assertNotEqual(Node(3, None, None), Leaf(3))
-        self.assertEqual(Node(None, None, None), Node(None, None, None))
 
     def test_map(self):
         self.assertEqual(

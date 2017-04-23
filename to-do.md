@@ -1,7 +1,15 @@
 
 # Next task
-* Subclass stubs
 * unittests for subclass stub constructors & typing
+* Unittests for tree methods:
+    - join
+    - bind
+    - lift
+    - apply
+    - fold
+    - traverse
+    - zero
+    - identity
 
 # Building UnitTree
 * Subclass Tree versions:
@@ -16,6 +24,15 @@
 * Write unittests for UnitTree
     - Related - Tree methods - no directly call Empty/Leaf/Node as constructors
         + messes up inheritance
+    - Unittests for UnitTree methods:
+        + join
+        + bind
+        + lift
+        + apply
+        + fold
+        + traverse
+        + zero
+        + identity
 
 # Bugfixes
 
