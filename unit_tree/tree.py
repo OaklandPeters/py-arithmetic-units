@@ -218,11 +218,6 @@ Tree.codomain = Tree
 
 class Empty(Tree):
 
-    # def __new__(cls):
-    #     self = object.__new__(cls)
-    #     self.__init__()
-    #     return self
-
     def __init__(self):
         pass
 
@@ -238,11 +233,6 @@ class Empty(Tree):
 class Leaf(Generic[D, Domain], Tree[Domain]):
 
     value: Union[Domain, Tree[Domain]]
-
-    # def __new__(cls, value):
-    #     self = object.__new__(cls)
-    #     self.__init__(value)
-    #     return self
 
     def __init__(self, value):
         self.value = value
@@ -273,13 +263,6 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
     value: C
     left: Union[D, Empty]
     right: Union[D, Empty]
-
-    # def __new__(cls, value,
-    #             left: Union[D, Type[NotPassed]] = NotPassed,
-    #             right: Union[D, Type[NotPassed]] = NotPassed):
-    #     self = object.__new__(cls)
-    #     self.__init__(value, left, right)
-    #     return self
 
     def __init__(self, value,
                  left: Union[D, Type[NotPassed]] = NotPassed,
