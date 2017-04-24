@@ -7,10 +7,9 @@
 import operator
 from typing import Generic, TypeVar, Union
 
+from .unit_tree import UnitTree, UnitNode, UnitLeaf, UnitEmpty
 
 EitherDomain = Union[Number, UnitTree[Number]]
-
-
 
 
 class UnitTreeFunction:
@@ -23,12 +22,19 @@ class UnitTreeFunction:
     def register(cls, unit_tree_function: UnitTreeFunction):
         cls.registry[operation.operator] = operation
 
-
     @classmethod
-    def map(cls, ):
+    def map(cls, pair, operation):
+        # unpack arguments
+        left, right = pair
         # Look up the operation
-        UnitTreeFunction.registry[operation]
-        pass
+        if operation in UnitTreeFunction.registry:
+            unit_tree_function = UnitTreeFunction.registry[operation]
+        else:
+            raise KeyError(str.format(
+                "operation '{0}' is not a registered UnitTreeFunction operation",
+                repr(operation)
+            ))
+        return UnitNode(unit_tree_function, left, right)
 
 
 @UnitTreeFunction.register
