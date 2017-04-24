@@ -11,7 +11,8 @@ from unit_tree import (
     TreeMeta,
     TreeBase, UnitBase,
     Dimension, NullUnit,
-    UnitTree, UnitNode, UnitLeaf, UnitEmpty
+    UnitTree, UnitNode, UnitLeaf, UnitEmpty,
+    UnitTreeFunction, Add, Subtract, Multiply, Divide
 )
 
 _default_type_mapping = {

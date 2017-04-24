@@ -1,6 +1,6 @@
 
 # Next task
-* unittests for subclass stub constructors & typing
+* Unittest registry
 * Unittests for tree methods:
     - join
     - bind
