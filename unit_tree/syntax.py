@@ -5,20 +5,34 @@
 
 """
 import operator
+from typing import Generic, TypeVar, Union
 
 
-class Operations:
-    registry = []
-
-operation_registry = {}
+EitherDomain = Union[Number, UnitTree[Number]]
 
 
-def register(klass):
-    operator_registry[klass.scalar_function] = klass
 
 
-@register
-class Multiply:
+class UnitTreeFunction:
+    """
+    Also a Arithmetic to UnitFunction Functor
+    """
+    registry = {}
+
+    @classmethod
+    def register(cls, unit_tree_function: UnitTreeFunction):
+        cls.registry[operation.operator] = operation
+
+
+    @classmethod
+    def map(cls, ):
+        # Look up the operation
+        UnitTreeFunction.registry[operation]
+        pass
+
+
+@UnitTreeFunction.register
+class Multiply(UnitTreeFunction):
     """
     operator_registry[operator.__mul__] = Multiply
     """
@@ -26,35 +40,75 @@ class Multiply:
     name = "multiply"
     operator = operator.__mul__
 
-    @classmethod
-    def dimension_function(cls, left, right):
-        pass
 
-
-@register
-class Divide(UnitsFunction):
+@UnitTreeFunction.register
+class Divide(UnitTreeFunction):
     short = "/"
     name = "divide"
-    scalar_function = operator.__truediv__
+    operator = operator.__truediv__
 
 
-@register
-class Add(UnitsFunction):
+@UnitTreeFunction.register
+class Add(UnitTreeFunction):
     short = "+"
     name = "add"
-    scalar_function = operator.__add__
+    operator = operator.__add__
 
 
-@register
-class Subtract(UnitsFunction):
+@UnitTreeFunction.register
+class Subtract(UnitTreeFunction):
     short = "-"
     name = "subtract"
-    scalar_function = operator.__add__
+    operator = operator.__add__
 
 
-class NodeSyntaxFunctor:
-    def __mul__(self, tree):
-        pass
+
+
+
+
+
+class UnitSyntax:
+    def __add__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__add__, self, a)
+
+    def __radd__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__add__, a, self)
+
+    def __sub__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__sub__, self, a)
+
+    def __rsub__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__sub__, a, self)
+
+    def __mul__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__mul__, self, a)
+
+    def __rmul__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__mul__, a, self)
+
+    def __truediv__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__truediv__, self, a)
+
+    def __rtruediv__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__truediv__, a, self)
+
+    def __floordiv__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__floordiv__, self, a)
+
+    def __rfloordiv__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__floordiv__, a, self)
+
+    def __mod__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__mod__, self, a)
+
+    def __rmod__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__mod__, a, self)
+
+    def __pow__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__pow__, self, a)
+
+    def __rpow__(self, a: EitherDomain) -> Codomain:
+        return self.functor.bind(operator.__pow__, a, self)
 
 #===================================================
 #  Functor splat

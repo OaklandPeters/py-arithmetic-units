@@ -11,6 +11,7 @@
     - zero
     - identity
 
+
 # Building UnitTree
 * Subclass Tree versions:
     - UnitTree
@@ -35,6 +36,8 @@
         + identity
 
 # Bugfixes
+* Dimension should not inherit from TreeBase, but should have metaclass=TreeMeta
+    - Then override __Call__
 
 # Cleanup
 * Remove __call__ from Tree - inherited one from UnitBase should be fine

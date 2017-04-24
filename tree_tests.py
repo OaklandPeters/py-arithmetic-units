@@ -275,6 +275,16 @@ class UnitTreeTests(unittest.TestCase):
     def test_unit_empty(self):
         self._validate_empty(UnitEmpty())
         self._validate_empty(self.construct())
+
+    def test_basic_operator_syntax(self):
+        # Leaf(5) * Leaf(3)
+        # -> Leaf(5).__mul__(Leaf(3))
+        # -> UnitTreeFunction.map(
+        #
+            UnitTreeFunction.lift(operator.__mul__)
+
+        pass
+
     # def test_multiplication_syntax_chaining(self):
     #     # Also - test that the nodes are Multiplication <: UnitFunction <: TreeFunction
     #     chained = UnitTree(5) * 4 * 3
