@@ -115,10 +115,6 @@ class Tree(Generic[Domain], TreeBase):
                 cls.maybe(tree.right, cls.join)
             )
         else:
-            import pdb
-            print("\n(tree::{0}) = {1}\n".format(tree.__class__.__name__, repr(tree)))
-            pdb.set_trace()
-
             raise UnitsTypeError("{0} is unrecognized subtype of tree".format(
                 tree.__class__.__name__
             ))
@@ -222,10 +218,10 @@ Tree.codomain = Tree
 
 class Empty(Tree):
 
-    def __new__(cls):
-        self = object.__new__(cls)
-        self.__init__()
-        return self
+    # def __new__(cls):
+    #     self = object.__new__(cls)
+    #     self.__init__()
+    #     return self
 
     def __init__(self):
         pass
@@ -243,10 +239,10 @@ class Leaf(Generic[D, Domain], Tree[Domain]):
 
     value: Union[Domain, Tree[Domain]]
 
-    def __new__(cls, value):
-        self = object.__new__(cls)
-        self.__init__(value)
-        return self
+    # def __new__(cls, value):
+    #     self = object.__new__(cls)
+    #     self.__init__(value)
+    #     return self
 
     def __init__(self, value):
         self.value = value
@@ -278,12 +274,12 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
     left: Union[D, Empty]
     right: Union[D, Empty]
 
-    def __new__(cls, value,
-                left: Union[D, Type[NotPassed]] = NotPassed,
-                right: Union[D, Type[NotPassed]] = NotPassed):
-        self = object.__new__(cls)
-        self.__init__(value, left, right)
-        return self
+    # def __new__(cls, value,
+    #             left: Union[D, Type[NotPassed]] = NotPassed,
+    #             right: Union[D, Type[NotPassed]] = NotPassed):
+    #     self = object.__new__(cls)
+    #     self.__init__(value, left, right)
+    #     return self
 
     def __init__(self, value,
                  left: Union[D, Type[NotPassed]] = NotPassed,

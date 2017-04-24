@@ -273,7 +273,7 @@ class UnitTreeTests(unittest.TestCase):
         self.assertEqual(node.right, expected_right)
 
     def test_unit_empty(self):
-        self._validate_empty(Empty())
+        self._validate_empty(UnitEmpty())
         self._validate_empty(self.construct())
     # def test_multiplication_syntax_chaining(self):
     #     # Also - test that the nodes are Multiplication <: UnitFunction <: TreeFunction
