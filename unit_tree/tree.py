@@ -20,6 +20,7 @@ B = TypeVar('B', bound=Domain)
 C = TypeVar('C', bound=Domain)
 D = TypeVar('D', bound=Domain)
 DomainFunction = Callable[[Domain], Domain]
+EitherDomain = Union[Domain, 'Tree']
 TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
 
 

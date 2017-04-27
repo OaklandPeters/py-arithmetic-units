@@ -5,40 +5,51 @@
 
 """
 import operator
-from typing import Generic, TypeVar, Union
 
-from .unit_tree import UnitTree, UnitNode, UnitLeaf, UnitEmpty
-
-EitherDomain = Union[Number, UnitTree[Number]]
+from .tree import Node, Tree, EitherDomain
 
 
-class UnitTreeFunction:
+class TreeFunction:
     """
     Also a Arithmetic to UnitFunction Functor
     """
     registry = {}
+    domain: Tuple[Tree, EitherDomain]
+    codomain: Node
 
     @classmethod
-    def register(cls, unit_tree_function: UnitTreeFunction):
-        cls.registry[operation.operator] = operation
+    def register(cls, tree_function: 'TreeFunction'):
+        cls.registry[tree_function.operator] = tree_function
+
+    @classmethod
+    def lift(cls, operation):
+        if operation in TreeFunction.registry:
+            return TreeFunction.registry[operation]
+        else:
+            raise KeyError(str.format(
+                "operation '{0}' is not a registered TreeFunction operation",
+                repr(operation)
+            ))
 
     @classmethod
     def map(cls, pair, operation):
-        # unpack arguments
+
+
+    @classmethod
+    def apply(cls, pair: 'Tuple[Tree, EitherDomain]', tree_Function: 'TreeFunction') -> Node:
+
+    @classmethod
+    def call(cls, tree_function: 'TreeFunction', pair: 'Tuple[Tree, EitherDomain]') -> Node:
         left, right = pair
-        # Look up the operation
-        if operation in UnitTreeFunction.registry:
-            unit_tree_function = UnitTreeFunction.registry[operation]
-        else:
-            raise KeyError(str.format(
-                "operation '{0}' is not a registered UnitTreeFunction operation",
-                repr(operation)
-            ))
-        return UnitNode(unit_tree_function, left, right)
+        return Node(cls.lift(operation), left, right)
 
 
-@UnitTreeFunction.register
-class Multiply(UnitTreeFunction):
+    def __call__(self, pair):
+        return self.map(pair, self.operator)
+
+
+@TreeFunction.register
+class Multiply(TreeFunction):
     """
     operator_registry[operator.__mul__] = Multiply
     """
@@ -47,78 +58,75 @@ class Multiply(UnitTreeFunction):
     operator = operator.__mul__
 
 
-@UnitTreeFunction.register
-class Divide(UnitTreeFunction):
+@TreeFunction.register
+class Divide(TreeFunction):
     short = "/"
     name = "divide"
     operator = operator.__truediv__
 
 
-@UnitTreeFunction.register
-class Add(UnitTreeFunction):
+@TreeFunction.register
+class Add(TreeFunction):
     short = "+"
     name = "add"
     operator = operator.__add__
 
 
-@UnitTreeFunction.register
-class Subtract(UnitTreeFunction):
+@TreeFunction.register
+class Subtract(TreeFunction):
     short = "-"
     name = "subtract"
     operator = operator.__add__
 
 
+class TreeArithmeticSyntax:
+
+    def __add__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__add__, (self, a))
+
+    def __radd__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__add__, (a, self))
+
+    def __sub__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__sub__, (self, a))
+
+    def __rsub__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__sub__, (a, self))
+
+    def __mul__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__mul__, (self, a))
+
+    def __rmul__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__mul__, (a, self))
+
+    def __truediv__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__truediv__, (self, a))
+
+    def __rtruediv__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__truediv__, (a, self))
+
+    def __floordiv__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__floordiv__, (self, a))
+
+    def __rfloordiv__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__floordiv__, (a, self))
+
+    def __mod__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__mod__, (self, a))
+
+    def __rmod__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__mod__, (a, self))
+
+    def __pow__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__pow__, (self, a))
+
+    def __rpow__(self, a: EitherDomain) -> Node:
+        return TreeFunction.map(operator.__pow__, (a, self))
 
 
-
-
-
-class UnitSyntax:
-    def __add__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__add__, self, a)
-
-    def __radd__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__add__, a, self)
-
-    def __sub__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__sub__, self, a)
-
-    def __rsub__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__sub__, a, self)
-
-    def __mul__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__mul__, self, a)
-
-    def __rmul__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__mul__, a, self)
-
-    def __truediv__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__truediv__, self, a)
-
-    def __rtruediv__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__truediv__, a, self)
-
-    def __floordiv__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__floordiv__, self, a)
-
-    def __rfloordiv__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__floordiv__, a, self)
-
-    def __mod__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__mod__, self, a)
-
-    def __rmod__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__mod__, a, self)
-
-    def __pow__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__pow__, self, a)
-
-    def __rpow__(self, a: EitherDomain) -> Codomain:
-        return self.functor.bind(operator.__pow__, a, self)
-
-#===================================================
+# ===================================================
 #  Functor splat
-#===================================================
+# ===================================================
 # Lifting functions in several ways
 #  The eventual syntax on Tree will involve all of these
 
@@ -131,6 +139,3 @@ class UnitSyntax:
 #   but they *are* functors from BinaryNumber to UnaryNumber
 #   Functor[Domain=Tuple[Number, Number], Codomain=Tuple[Number]]
 #
-
-def lift_arithmetic_to_tree_operator(_operator) -> :
-

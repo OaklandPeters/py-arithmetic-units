@@ -5,8 +5,8 @@ from .base import (
 from .tree import (Tree, Empty, Leaf, Node)
 from .support import (bfs, dfs)
 from .dimension import (Dimension, NullUnit)
-from .unit_tree import (UnitTree, UnitEmpty, UnitLeaf, UnitNode)
-from .syntax import (UnitTreeFunction, Add, Subtract, Multiply, Divide)
+from .unit_tree import (UnitTree, UnitEmpty, UnitLeaf, UnitNode, UnitTreeFunction)
+from .syntax import (TreeFunction, Add, Subtract, Multiply, Divide, TreeArithmeticSyntax)
 
 __all__ = (
     Tree, Empty, Leaf, Node, bfs, dfs,
@@ -14,6 +14,6 @@ __all__ = (
     TreeMeta, NotPassed, identity,
     TreeBase, UnitBase,
     Dimension, NullUnit,
-    UnitTree, UnitEmpty, UnitLeaf, UnitNode,
-    UnitTreeFunction, Add, Subtract, Multiply, Divide
+    TreeFunction, Add, Subtract, Multiply, Divide, TreeArithmeticSyntax,
+    UnitTree, UnitEmpty, UnitLeaf, UnitNode, UnitTreeFunction
 )

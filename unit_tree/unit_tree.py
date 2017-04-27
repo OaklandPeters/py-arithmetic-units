@@ -5,9 +5,10 @@ from numbers import Number
 
 from .base import UnitBase, NotPassed
 from .tree import (Tree, Empty, Leaf, Node)
+from .syntax import TreeArithmeticSyntax, TreeFunction
 
 
-class UnitTree(Tree[Number], UnitBase):
+class UnitTree(Tree[Number], TreeArithmeticSyntax, UnitBase):
     def __new__(cls, value=NotPassed, left=NotPassed, right=NotPassed):
         if value is NotPassed:
             return object.__new__(UnitEmpty)
@@ -49,4 +50,8 @@ class UnitLeaf(Leaf, UnitTree):
 
 
 class UnitEmpty(Empty, UnitTree):
+    pass
+
+
+class UnitTreeFunction(TreeFunction):
     pass

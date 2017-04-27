@@ -5,14 +5,15 @@ py -m unittest tree_tests
 """
 import unittest
 from typing import Mapping
+import operator
 
 from unit_tree import (
     Tree, Empty, Leaf, Node,
     TreeMeta,
     TreeBase, UnitBase,
     Dimension, NullUnit,
-    UnitTree, UnitNode, UnitLeaf, UnitEmpty,
-    UnitTreeFunction, Add, Subtract, Multiply, Divide
+    UnitTree, UnitNode, UnitLeaf, UnitEmpty, UnitTreeFunction,
+    TreeFunction, Add, Subtract, Multiply, Divide, TreeArithmeticSyntax
 )
 
 _default_type_mapping = {
@@ -280,11 +281,20 @@ class UnitTreeTests(unittest.TestCase):
     def test_basic_operator_syntax(self):
         # Leaf(5) * Leaf(3)
         # -> Leaf(5).__mul__(Leaf(3))
-        # -> UnitTreeFunction.map(
+        # -> TreeFunction.map(
         #
-            UnitTreeFunction.lift(operator.__mul__)
+        node = UnitLeaf(5) * UnitLeaf(3)
 
-        pass
+        import pdb
+        print("\n(node::{0}) = {1}\n".format(node.__class__.__name__, repr(node)))
+        pdb.set_trace()
+
+    def test_tree_function_call(self):
+        tree_function = TreeFunction.lift(operator.__mul__)
+        result = unit_tree_function(UnitLeaf(5), UnitLeaf(3))
+        import pdb
+        print("\n(result::{0}) = {1}\n".format(result.__class__.__name__, repr(result)))
+        pdb.set_trace()
 
     # def test_multiplication_syntax_chaining(self):
     #     # Also - test that the nodes are Multiplication <: UnitFunction <: TreeFunction

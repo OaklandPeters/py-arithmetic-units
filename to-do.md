@@ -11,6 +11,11 @@
     - zero
     - identity
 
+# Clasification:
+* could probabably merge the functor parts of treefunction into Tree
+* Tree should be generic on two types, not one:
+    - Type of the node, and type of the leafs
+    - Probably should apply to Node, Leaf, and Empty as well
 
 # Building UnitTree
 * Subclass Tree versions:
