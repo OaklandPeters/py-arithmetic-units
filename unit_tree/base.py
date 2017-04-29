@@ -23,7 +23,10 @@ class TreeMeta(GenericMeta):
     with classes which use metaclass=TreeMeta, but also need to inherit from 'Generic'
     """
     def __call__(cls, *args, **kwargs):
-        return cls.__call__(*args, **kwargs)
+        if hasattr(cls, '__call__'):
+            return cls.__call__(*args, **kwargs)
+        elif hasattr(cls, '__new__'):
+            return cls.__new__(*args, **kwargs)
 
 
 class TreeBase(metaclass=TreeMeta):
