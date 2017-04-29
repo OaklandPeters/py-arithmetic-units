@@ -168,12 +168,12 @@ class Tree(Generic[Domain], TreeBase):
             return f(tree.value, accumulator)
         elif isinstance(tree, Node):
             return cls.fold(
+                tree.left,
                 f,
                 f(
                     tree.value,
                     cls.fold(f, accumulator, tree.right)
-                ),
-                tree.left
+                )
             )
         else:
             raise UnitsTypeError("{0} is unrecognized subtype of tree".format(

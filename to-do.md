@@ -1,5 +1,7 @@
 
 # Next task
+* Test fold
+* Unittests: more for join - Node(...).join()
 * Confirm - that Node.value is also a Leaf
 * UnitTree composition --> platform for simplify()
 
