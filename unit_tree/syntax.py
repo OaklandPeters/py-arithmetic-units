@@ -5,11 +5,13 @@
 
 """
 import operator
+from typing import Tuple
 
+from .base import TreeMeta
 from .tree import Node, Tree, EitherDomain
 
 
-class TreeFunction:
+class TreeFunction(metaclass=TreeMeta):
     """
     Also a Arithmetic to UnitFunction Functor
     """
@@ -33,19 +35,27 @@ class TreeFunction:
 
     @classmethod
     def map(cls, pair, operation):
-
-
-    @classmethod
-    def apply(cls, pair: 'Tuple[Tree, EitherDomain]', tree_Function: 'TreeFunction') -> Node:
+        return cls.apply(pair, cls.lift(operation))
 
     @classmethod
-    def call(cls, tree_function: 'TreeFunction', pair: 'Tuple[Tree, EitherDomain]') -> Node:
+    def apply(cls, pair: 'Tuple[Tree, EitherDomain]', tree_function: 'TreeFunction') -> Node:
+        # unpack arguments
         left, right = pair
-        return Node(cls.lift(operation), left, right)
+        # Look up the operation
+        return Node(tree_function, left, right)
 
+    @classmethod
+    def call(cls, tree_function, pair):
+        return cls.apply(pair, tree_function)
 
-    def __call__(self, pair):
-        return self.map(pair, self.operator)
+    @classmethod
+    def __call__(cls, left, right):
+        return cls.apply((left, right), cls)
+
+    # @classmethod
+    # def __call__(cls, pair):
+    #     return cls.apply(pair, self)
+
 
 
 @TreeFunction.register
