@@ -1,15 +1,7 @@
 
 # Next task
-* Unittest registry
-* Unittests for tree methods:
-    - join
-    - bind
-    - lift
-    - apply
-    - fold
-    - traverse
-    - zero
-    - identity
+* Confirm - that Node.value is also a Leaf
+* UnitTree composition --> platform for simplify()
 
 # Clasification:
 * could probabably merge the functor parts of treefunction into Tree
@@ -47,6 +39,7 @@
 # Cleanup
 * Remove __call__ from Tree - inherited one from UnitBase should be fine
 
+
 # Mathematical correctness
 * Make the Domain of Tree correct - via (,) | (A,) | (B, A, A)
     - I'm not sure how to provide type for empty tuple ~ Domain for Empty
@@ -55,6 +48,18 @@
     - fold
     - traverse
     - join
+
+# Testing
+* Unittest registry
+* Unittests for tree methods:
+    - join
+    - bind
+    - lift
+    - apply
+    - fold
+    - traverse
+    - zero
+    - identity
 
 # Simplification
 * Copy usable portions of py_units/simplfy.py --> unit_tree/simplify.py
@@ -67,3 +72,12 @@
     - class Rules ~ List[Rule]
 * INITIALLY - avoid pattern-recognition problem, by only specifying purely local patterns
     - LocalPattern - only looks at Tree elm its given, and that elm's immediate children
+
+# Advanced
+* Switch TreeFunction to be an instanciatble class
+    - Multiply, Add, etc become instances
+    - Hard part: getting `__call__` to work - given that I change __call__ in metaclass
+    - Easiest would be: if TreeMEta.__call__ changed
+        + Leave calling __init__ up to __new__
+        + Meta.__call__ --> cls.__new__
+        + @classmethod __call__
