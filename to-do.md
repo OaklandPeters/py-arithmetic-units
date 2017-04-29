@@ -3,7 +3,10 @@
 * Test fold
 * Unittests: more for join - Node(...).join()
 * Confirm - that Node.value is also a Leaf
+* Tests for callable TreeFunction
+    - apply, call, __call__, map, lift
 * UnitTree composition --> platform for simplify()
+
 
 # Clasification:
 * could probabably merge the functor parts of treefunction into Tree

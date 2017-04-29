@@ -204,13 +204,13 @@ class TreeTests(unittest.TestCase):
         )
 
     def test_join_leaf(self):
-        # pile = Leaf(Leaf(Leaf(Leaf('x'))))
-        # out = Tree.join(pile)
-        # self.assertEqual(out, Leaf('x'))
+        pile = Leaf(Leaf(Leaf(Leaf('x'))))
+        out = Tree.join(pile)
+        self.assertEqual(out, Leaf('x'))
 
-        # thing = Leaf(Leaf(Leaf(Empty())))
-        # nothing = Tree.join(thing)
-        # self.assertEqual(nothing, None)
+        thing = Leaf(Leaf(Leaf(Empty())))
+        nothing = Tree.join(thing)
+        self.assertEqual(nothing, None)
 
         node = Node(1, 2, 3)
         noddy = Leaf(Leaf(Leaf(node)))
@@ -278,23 +278,20 @@ class UnitTreeTests(unittest.TestCase):
         self._validate_empty(UnitEmpty())
         self._validate_empty(self.construct())
 
-    def test_basic_operator_syntax(self):
-        # Leaf(5) * Leaf(3)
-        # -> Leaf(5).__mul__(Leaf(3))
-        # -> TreeFunction.map(
-        #
-        node = UnitLeaf(5) * UnitLeaf(3)
-
-        import pdb
-        print("\n(node::{0}) = {1}\n".format(node.__class__.__name__, repr(node)))
-        pdb.set_trace()
+    # def test_basic_operator_syntax(self):
+    #     # Leaf(5) * Leaf(3)
+    #     # -> Leaf(5).__mul__(Leaf(3))
+    #     # -> TreeFunction.map(
+    #     #
+    #     node = UnitLeaf(5) * UnitLeaf(3)
 
     def test_tree_function_call(self):
         tree_function = TreeFunction.lift(operator.__mul__)
-        result = unit_tree_function(UnitLeaf(5), UnitLeaf(3))
-        import pdb
-        print("\n(result::{0}) = {1}\n".format(result.__class__.__name__, repr(result)))
-        pdb.set_trace()
+        result = tree_function(UnitLeaf(5), UnitLeaf(3))
+        self.assertEqual(
+            result,
+            Node(tree_function, UnitLeaf(5), UnitLeaf(3))
+        )
 
     # def test_multiplication_syntax_chaining(self):
     #     # Also - test that the nodes are Multiplication <: UnitFunction <: TreeFunction
@@ -366,3 +363,5 @@ class UnitTreeTests(unittest.TestCase):
 #         waaaat = Scalar(2) + 3 + 4 + 5
 #         self.assertIsInstance(waaaat, Scalar)
 #         self.assertEqual(waaaat, Scalar(2 + 3 + 4 + 5))
+
+
