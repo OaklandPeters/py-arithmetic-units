@@ -1,5 +1,11 @@
 
+
+
+
 # Next task
+* Write meets.py - do via the registry system
+    - Tree.__meets__
+* change generic parameters on Tree --> to be parameters for Node, and NOT Domain
 * Test fold
 * Unittests: more for join - Node(...).join()
 * Confirm - that Node.value is also a Leaf
@@ -7,6 +13,13 @@
     - apply, call, __call__, map, lift
 * UnitTree composition --> platform for simplify()
 
+
+# Testing
+* Testing to confirm however I'm supposed to use generic parameters on Tree
+* I'm very confused ATM - because Leaf[A] should have one parameter - but I'm ending up with 3
+* UnitTree.maybe(..., f) and UnitTree.maybe(..., _not=f)
+    - Purpose: confirm that domain and codomain are correct
+    - Try running it against Tree objects and UnitTree objects, and normal objects
 
 # Clasification:
 * could probabably merge the functor parts of treefunction into Tree

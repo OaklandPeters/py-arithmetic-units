@@ -4,17 +4,19 @@ cd py-arithmetic-units\
 py -m unittest tree_tests
 """
 import unittest
-from typing import Mapping
+from typing import Mapping, Optional, Union, Callable, Tuple, Sequence
 import operator
+from numbers import Number
 
 from unit_tree import (
     Tree, Empty, Leaf, Node,
-    TreeMeta,
+    TreeMeta, UnitsError,
     TreeBase, UnitBase,
     Dimension, NullUnit,
     UnitTree, UnitNode, UnitLeaf, UnitEmpty, UnitTreeFunction,
     TreeFunction, Add, Subtract, Multiply, Divide, TreeArithmeticSyntax
 )
+from unit_tree.meets import meets, _handle_as_type, _register
 
 _default_type_mapping = {
     TreeBase: False,
@@ -158,6 +160,19 @@ class TreeTests(unittest.TestCase):
             Tree.maybe(Leaf('x'), lambda x: x.value),
             'x'
         )
+        self.assertEqual(
+            Tree.maybe(3, _not=lambda x: 3 - 2),
+            1
+        )
+        self.assertEqual(
+            Tree.maybe(Leaf(3), _not=lambda x: 3 - 2),
+            Leaf(3)
+        )
+        # Confirm whether maybe works on subclasses
+        self.assertEqual(
+            Tree.maybe(UnitLeaf(3), lambda x: x.value * 2),
+            6
+        )
 
     def test_empty_equality(self):
         self.assertEqual(Empty(), Empty())
@@ -201,6 +216,14 @@ class TreeTests(unittest.TestCase):
         self.assertEqual(
             Tree.map(Node(1, 2, 3), lambda x: x + 3),
             Node(4, 5, 6)
+        )
+        self.assertEqual(
+            Tree.map(Node("a", "bb", "ccc"), lambda x: x + x),
+            Node(Leaf("aa"), Leaf("bbbb"), Leaf("cccccc"))
+        )
+        self.assertRaises(
+            TypeError,
+            lambda: Tree.map(Node("a", "b", None), lambda x: x + x)
         )
 
     def test_join_leaf(self):
@@ -277,6 +300,12 @@ class UnitTreeTests(unittest.TestCase):
     def test_unit_empty(self):
         self._validate_empty(UnitEmpty())
         self._validate_empty(self.construct())
+
+    def test_unittree_maybe(self):
+        # Test that the subclass version doesn't dispatch on instances of the Parent class
+        self.assertEqual(UnitTree.maybe(Leaf(5), lambda x: x * 3), Leaf(5))
+        # Confirm that it doesn't work on non-tree objects
+        self.assertRaises(UnitsError, lambda: UnitTree.maybe(5, lambda x: x + 3))
 
     # def test_basic_operator_syntax(self):
     #     # Leaf(5) * Leaf(3)
@@ -365,3 +394,46 @@ class UnitTreeTests(unittest.TestCase):
 #         self.assertEqual(waaaat, Scalar(2 + 3 + 4 + 5))
 
 
+class MeetsTests(unittest.TestCase):
+    """
+    Add tests:
+    * Where _type is a Type object itself - such as int
+    * Where _type is SpecialType Union
+    * Where instance is a Type-Union
+    """
+
+    def test_handling(self):
+        self.assertEqual(_handle_as_type(Optional[int]), Union)
+        self.assertEqual(_handle_as_type(Union[int, list]), Union)
+        self.assertEqual(_handle_as_type(Callable[[int], int]), Callable)
+        self.assertEqual(_handle_as_type(Tuple[str, dict]), Tuple)
+
+    def test_meets_on_builtins(self):
+        self.assertTrue(meets(3, int))
+
+    def test_meets_on_abstract_classes(self):
+        self.assertTrue(meets([], Sequence))
+
+    def test_meets_on_union(self):
+        self.assertTrue(meets(3, Union[Number, str]))
+        self.assertTrue(meets(3, Union[int, str]))
+        self.assertFalse(meets(3, Union[str, list]))
+
+    def test_meets_on_optional(self):
+        self.assertTrue(meets(None, Optional[int]))
+        self.assertTrue(meets(3, Optional[int]))
+        self.assertTrue(meets(None, Optional[None.__class__]))
+        self.assertFalse(meets('x', Optional[int]))
+        self.assertFalse(meets(list, Optional[list]))
+
+    def test_tree(self):
+        @_register(Tree)
+        def meets_Tree(instance, tree_type):
+            if not isinstance(instance, Tree):
+                return False
+            # Now - to get the generic parameters off tree_type, if it has them
+            import pdb
+            print("\n(tree_type::{0}) = {1}\n".format(tree_type.__class__.__name__, repr(tree_type)))
+            pdb.set_trace()
+
+        result = meets(Node(3, 3, 3), Node[int, int, int])

@@ -8,6 +8,7 @@ from .arithmetic import (
     UnitsFunction, Multiply, Divide, UnitsFunctionStem
 )
 from .functor import Functor, InvariantFunctor
+from .meets import meets
 
 __all__ = (
     UnitsError,
@@ -27,5 +28,6 @@ __all__ = (
     UnitsFunction,
     Multiply,
     Divide,
-    UnitsFunctionStem
+    UnitsFunctionStem,
+    meets
 )
