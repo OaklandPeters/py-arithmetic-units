@@ -64,8 +64,8 @@ def meets(instance, _type):
     handle = _handle_as_type(_type)
     if hasattr(handle, '__meets__'):
         return handle.__meets__(instance, _type)
-    elif _type in _registry:
-        return _registry[_type](instance, _type)
+    elif handle in _registry:
+        return _registry[handle](instance, _type)
     else:
         return isinstance(instance, _type)
 
