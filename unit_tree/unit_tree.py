@@ -1,14 +1,19 @@
 """
 Build UnitTree out of abstract Tree
 """
+from typing import Union, Callable
 from numbers import Number
 
 from .base import UnitBase, NotPassed
 from .tree import (Tree, Empty, Leaf, Node)
 from .syntax import TreeArithmeticSyntax, TreeFunction
+from .dimension import Dimension
 
 
-class UnitTree(Tree[Number], TreeArithmeticSyntax, UnitBase):
+NumberBinaryFunction = Callable[[Number, Number], Number]
+
+
+class UnitTree(Tree[NumberBinaryFunction, Number, Number], TreeArithmeticSyntax, UnitBase):
     def __new__(cls, value=NotPassed, left=NotPassed, right=NotPassed):
         if value is NotPassed:
             return object.__new__(UnitEmpty)
@@ -38,7 +43,9 @@ class UnitTree(Tree[Number], TreeArithmeticSyntax, UnitBase):
 
 
 UnitTree.codomain = UnitTree
-UnitTree.domain = object
+UnitTree.domain = Union[TreeFunction, Number, Dimension]
+# Union types cannot be used in type-checking atm
+# UnitTree.domain = Union[TreeFunction, Number, Dimension]
 
 
 class UnitNode(Node, UnitTree):

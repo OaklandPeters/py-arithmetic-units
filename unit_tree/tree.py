@@ -15,16 +15,20 @@ from typing import (
 from .base import TreeMeta, TreeBase, NotPassed, UnitsTypeError, identity
 
 Domain = TypeVar('Domain')
-A = TypeVar('A', bound=Domain)
-B = TypeVar('B', bound=Domain)
-C = TypeVar('C', bound=Domain)
-D = TypeVar('D', bound=Domain)
+V = TypeVar('V', bound=Domain)
+L = TypeVar('L', bound=Domain)
+R = TypeVar('R', bound=Domain)
+B = TypeVar('B')
 DomainFunction = Callable[[Domain], Domain]
-EitherDomain = Union[Domain, 'Tree']
-TreeFunction = Callable[['Tree[Domain]'], 'Tree[Domain]']
+Codomain = TypeVar('Codomain', bound='Tree[V, L, R]')
+CodomainFunction = Callable[['Tree[V, L, R]'], 'Tree[V, L, R]']
+TreeFunction = CodomainFunction
+EitherDomain = Union[Domain, Codomain]
+
+A = TypeVar('A')
 
 
-class Tree(Generic[Domain], TreeBase):
+class Tree(Generic[V, L, R], TreeBase):
     """
     Binary abstract tree.
     Allows for the possibility of the center of a Node having a different
@@ -32,7 +36,7 @@ class Tree(Generic[Domain], TreeBase):
     """
     # Child classes need to override Domain
     domain: Domain
-    codomain: 'Tree'
+    codomain: Codomain
 
     def __new__(cls, value=NotPassed, left=NotPassed, right=NotPassed):
         if value is NotPassed:
@@ -41,6 +45,10 @@ class Tree(Generic[Domain], TreeBase):
             return object.__new__(Leaf)
         else:
             return object.__new__(Node)
+
+    @classmethod
+    def __meets__(cls, instance, type_generic):
+        pass
 
     @classmethod
     def __call__(cls, *args):
@@ -52,7 +60,7 @@ class Tree(Generic[Domain], TreeBase):
         return self
 
     @classmethod
-    def map(cls, tree: 'Tree[Domain]', f: DomainFunction) -> 'Tree[Domain]':
+    def map(cls, tree: Codomain, f: DomainFunction) -> Codomain:
         """Note - I dont like having map on the parent class Tree dispatch
         on the type of the children -
         because it require that class to know about the internals.
@@ -74,8 +82,8 @@ class Tree(Generic[Domain], TreeBase):
 
     @classmethod
     def maybe(cls,
-              x: Union['Tree', Domain],
-              _do: Callable[['Tree'], Any]=identity,
+              x: Union[Codomain, Domain],
+              _do: Callable[[Codomain], Any]=identity,
               _not: Callable[[Domain], Any]=identity):
         """Sugar meta-function. Conditionally apply a function to the input
         when it is and/or is-not a type of Tree.
@@ -92,7 +100,7 @@ class Tree(Generic[Domain], TreeBase):
             ))
 
     @classmethod
-    def join(cls, tree: 'Tree[Domain]'):
+    def join(cls, tree: Codomain):
         """
         I think the key here is that it depends on what the children are
         """
@@ -120,9 +128,9 @@ class Tree(Generic[Domain], TreeBase):
                 tree.__class__.__name__
             ))
 
-    def bind(cls, value: Union[Domain, 'Tree[Domain]'],
-             f: Callable[[Domain], 'Tree[Domain]'],
-             ) -> 'Tree[Domain]':
+    def bind(cls, value: Union[Domain, Codomain],
+             f: Callable[[Domain], Codomain],
+             ) -> Codomain:
         """The point of this is that it supports having either domain or Tree
         as the argument. Especially valuable when you generalize it to *values varargs.
 
@@ -134,7 +142,7 @@ class Tree(Generic[Domain], TreeBase):
         return cls.join(cls.map(value, f))
 
     @classmethod
-    def construct(cls, domain: Domain = NotPassed) -> 'Tree[Domain]':
+    def construct(cls, domain: Domain = NotPassed) -> Codomain:
         """Construct a Tree element out of a Domain element"""
         # Handle an edge case - where domain is 'NotPassed', but
         # we need to prevent passing 'NotPassed' into Empty.__init__
@@ -152,16 +160,16 @@ class Tree(Generic[Domain], TreeBase):
         M[A] -> M[B]
         """
         @functools.wraps(func)
-        def wrapper(tree: 'Tree[Domain]') -> 'Tree[Domain]':
+        def wrapper(tree: Codomain) -> Codomain:
             return cls.map(dfunc, tree)
         return wrapper
 
     @classmethod
-    def apply(cls, tree: 'Tree[Domain]', tfunc: TreeFunction):
+    def apply(cls, tree: Codomain, tfunc: TreeFunction):
         return tfunc(tree)
 
     @classmethod
-    def fold(cls, tree: 'Tree[A]', f: Callable[[A, B], B], accumulator: B):
+    def fold(cls, tree: Codomain, f: Callable[[Domain, B], B], accumulator: B):
         if isinstance(tree, Empty):
             return accumulator
         elif isinstance(tree, Leaf):
@@ -181,7 +189,7 @@ class Tree(Generic[Domain], TreeBase):
             ))
 
     @classmethod
-    def traverse(cls, tree: 'Tree[A]', f: TreeFunction):
+    def traverse(cls, tree: Codomain, f: TreeFunction):
         if isinstance(tree, Empty):
             # traverse f Empty = pure Empty
             #  which looks like it would be: return cls.construct(tree)
@@ -204,11 +212,11 @@ class Tree(Generic[Domain], TreeBase):
             ))
 
     @classmethod
-    def zero(cls) -> 'Tree[A]':
+    def zero(cls) -> Codomain:
         return Empty()
 
     @classmethod
-    def identity(cls, tree: 'Tree[A]'):
+    def identity(cls, tree: Codomain):
         return cls.map(tree, identity)
 
 
@@ -217,7 +225,7 @@ Tree.domain = object
 Tree.codomain = Tree
 
 
-class Empty(Tree):
+class Empty(Tree[Any, Any, Any]):
 
     def __init__(self):
         pass
@@ -231,11 +239,11 @@ class Empty(Tree):
         return True if isinstance(other, Empty) else False
 
 
-class Leaf(Generic[D, Domain], Tree[Domain]):
+class Leaf(Generic[V], Tree[V, Any, Any]):
 
-    value: Union[Domain, Tree[Domain]]
+    value: Union[V, None]
 
-    def __init__(self, value):
+    def __init__(self, value: V):
         self.value = value
 
     def __repr__(self):
@@ -250,7 +258,7 @@ class Leaf(Generic[D, Domain], Tree[Domain]):
             return False
 
 
-class Node(Generic[C, D, Domain], Tree[Domain]):
+class Node(Tree[V, L, R]):
     """
     The types of value and left/right are left very vague, because
     particular tree types may have very different notions of what
@@ -261,13 +269,14 @@ class Node(Generic[C, D, Domain], Tree[Domain]):
     and left/right: Node
     """
 
-    value: C
-    left: Union[D, Empty]
-    right: Union[D, Empty]
+    value: Leaf[V]
+    left: Union[Leaf[L], None]
+    right: Union[Leaf[R], None]
 
-    def __init__(self, value,
-                 left: Union[D, Type[NotPassed]] = NotPassed,
-                 right: Union[D, Type[NotPassed]] = NotPassed):
+    def __init__(self,
+                 value: Union[V, Tree[V, L, R]],
+                 left: Union[L, Tree[V, L, R], Type[NotPassed]] = NotPassed,
+                 right: Union[R, Tree[V, L, R], Type[NotPassed]] = NotPassed):
         # If inputs are not Tree type - wrap them in one
         #   Generally results in putting things in a Leaf
         self.value = self.maybe(value, _not=self.construct)

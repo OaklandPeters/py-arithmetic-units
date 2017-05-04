@@ -4,10 +4,13 @@ from .base import UnitsTypeError
 from .tree import Tree, Empty, Leaf, Node
 
 
-A = TypeVar('A')
+Domain = TypeVar('Domain')
+V = TypeVar('V', bound=Domain)
+L = TypeVar('L', bound=Domain)
+R = TypeVar('R', bound=Domain)
 
 
-def dfs(tree: Tree[A]) -> Iterator[A]:
+def dfs(tree: Tree[V, L, R]) -> Iterator[Domain]:
     if isinstance(tree, Empty):
         pass
     elif isinstance(tree, Leaf):
@@ -22,7 +25,7 @@ def dfs(tree: Tree[A]) -> Iterator[A]:
         ))
 
 
-def bfs(tree: Tree[A]) -> Iterator[A]:
+def bfs(tree: Tree[V, L, R]) -> Iterator[Domain]:
     tree_list = [tree]
     while tree_list:
         new_tree_list = []
